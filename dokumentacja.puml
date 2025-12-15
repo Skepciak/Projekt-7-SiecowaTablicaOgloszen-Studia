@@ -1,0 +1,256 @@
+@startuml Diagram_Klas
+skinparam classAttributeIconSize 0
+skinparam backgroundColor #1e1e2e
+skinparam class {
+    BackgroundColor #313244
+    BorderColor #89b4fa
+    FontColor #cdd6f4
+    ArrowColor #89b4fa
+}
+
+title Diagram Klas - Sieciowa Tablica Ogłoszeń
+
+package "pl.tablicaogloszen.wspolne" #181825 {
+    class OgloszenieDTO <<Serializable>> {
+        - int id
+        - String tytul
+        - String tresc
+        - String daneKontaktowe
+        - String kategoria
+        - int idAutora
+        - String autor
+        - LocalDateTime dataDodania
+        + gettery()
+        + settery()
+    }
+    
+    class UzytkownikDTO <<Serializable>> {
+        - int id
+        - String login
+        - String rola
+        + getId(): int
+        + getLogin(): String
+        + getRola(): String
+    }
+    
+    class FiltrDTO <<Serializable>> {
+        - String kategoria
+        - String autor
+        - String szukajTekst
+        - String sortowanie
+    }
+    
+    class Zadanie <<Serializable>> {
+        - TypZadania typ
+        - Object dane
+        + getTyp(): TypZadania
+        + getDane(): Object
+    }
+    
+    class Odpowiedz <<Serializable>> {
+        - StatusOdpowiedzi status
+        - Object dane
+        - String wiadomosc
+    }
+    
+    enum TypZadania {
+        LOGOWANIE
+        REJESTRACJA
+        POBIERZ_OGLOSZENIA
+        POBIERZ_OGLOSZENIA_FILTR
+        DODAJ_OGLOSZENIE
+        EDYTUJ_OGLOSZENIE
+        USUN_OGLOSZENIE
+        POBIERZ_KATEGORIE
+    }
+    
+    enum StatusOdpowiedzi {
+        OK
+        BLAD
+        ODSWIEZ
+    }
+}
+
+package "pl.tablicaogloszen.serwer" #181825 {
+    class Serwer {
+        - {static} int PORT
+        - {static} Set<ObslugaKlienta> klienci
+        - {static} ExecutorService pulaWatkow
+        + {static} main(args)
+        + {static} usunKlienta(klient)
+        + {static} powiadomWszystkich()
+    }
+    
+    class ObslugaKlienta <<Runnable>> {
+        - Socket gniazdo
+        - ObjectOutputStream wyjscie
+        - ObjectInputStream wejscie
+        - UzytkownikDTO zalogowanyUzytkownik
+        + run()
+        - obslozZadanie(zadanie)
+        + wyslij(odpowiedz)
+    }
+    
+    class PolaczenieBazy <<Singleton>> {
+        - {static} String URL
+        - {static} Connection polaczenie
+        + {static} pobierzPolaczenie(): Connection
+    }
+    
+    class OgloszenieDAO {
+        + dodajOgloszenie(ogl, idAutora): boolean
+        + edytujOgloszenie(ogl, idUzyt, czyAdmin): boolean
+        + usunOgloszenie(idOgl, idUzyt, czyAdmin): boolean
+        + pobierzZFiltrem(filtr): List<OgloszenieDTO>
+        + pobierzWszystkie(): List<OgloszenieDTO>
+        + pobierzKategorie(): List<String>
+    }
+    
+    class UzytkownikDAO {
+        + zarejestruj(login, haslo): boolean
+        + zaloguj(login, haslo): UzytkownikDTO
+    }
+}
+
+package "pl.tablicaogloszen.klient" #181825 {
+    class AplikacjaKlienta <<JavaFX Application>> {
+        - {static} Stage glownaScena
+        + start(stage)
+        + {static} zaladujWidok(fxml)
+        + {static} main(args)
+    }
+    
+    class KlientSieciowy <<Singleton>> {
+        - {static} KlientSieciowy instancja
+        - Socket gniazdo
+        - ObjectOutputStream wyjscie
+        - ObjectInputStream wejscie
+        - KontrolerTablicy kontrolerTablicy
+        + {static} pobierzInstancje(): KlientSieciowy
+        + wyslijISprawdz(zadanie): Odpowiedz
+        - nasluchuj()
+    }
+    
+    class KontrolerLogowania <<FXML Controller>> {
+        - TextField poleLogin
+        - PasswordField poleHaslo
+        - zaloguj()
+        - idzDoRejestracji()
+    }
+    
+    class KontrolerRejestracji <<FXML Controller>> {
+        - TextField poleLogin
+        - PasswordField poleHaslo
+        - PasswordField polePowtorzHaslo
+        - zarejestruj()
+        - wrocDoLogowania()
+    }
+    
+    class KontrolerTablicy <<FXML Controller>> {
+        - ListView listaOgloszen
+        - ComboBox filtrKategoria
+        - ComboBox filtrSortowanie
+        + initialize()
+        + odswiezListe()
+        - zastosujFiltr()
+        - dodajOgloszenie()
+        - edytujOgloszenie(ogl)
+        - usunOgloszenie(ogl)
+        - generujRaport()
+    }
+    
+    class Sesja {
+        - {static} UzytkownikDTO zalogowanyUzytkownik
+        + {static} getZalogowanyUzytkownik()
+        + {static} setZalogowanyUzytkownik(u)
+    }
+}
+
+' Relacje
+Serwer "1" *-- "*" ObslugaKlienta : zarządza
+ObslugaKlienta ..> OgloszenieDAO : używa
+ObslugaKlienta ..> UzytkownikDAO : używa
+OgloszenieDAO ..> PolaczenieBazy : pobiera Connection
+UzytkownikDAO ..> PolaczenieBazy : pobiera Connection
+
+AplikacjaKlienta ..> KontrolerLogowania : ładuje FXML
+AplikacjaKlienta ..> KontrolerRejestracji : ładuje FXML
+AplikacjaKlienta ..> KontrolerTablicy : ładuje FXML
+
+KontrolerLogowania ..> KlientSieciowy : używa
+KontrolerRejestracji ..> KlientSieciowy : używa
+KontrolerTablicy ..> KlientSieciowy : używa
+KontrolerTablicy ..> Sesja : sprawdza uprawnienia
+
+KlientSieciowy ..> Zadanie : wysyła
+KlientSieciowy ..> Odpowiedz : odbiera
+ObslugaKlienta ..> Zadanie : odbiera
+ObslugaKlienta ..> Odpowiedz : wysyła
+
+@enduml
+
+' ================================================
+
+@startuml Diagram_Przypadkow_Uzycia
+left to right direction
+skinparam backgroundColor #1e1e2e
+skinparam usecase {
+    BackgroundColor #313244
+    BorderColor #89b4fa
+    FontColor #cdd6f4
+}
+skinparam actor {
+    BackgroundColor #89b4fa
+    BorderColor #89b4fa
+}
+
+title Diagram Przypadków Użycia - Sieciowa Tablica Ogłoszeń
+
+actor "Użytkownik\n(niezalogowany)" as Guest
+actor "Użytkownik\n(zalogowany)" as User
+actor "Administrator" as Admin
+actor "Serwer" as Server
+
+rectangle "System Tablicy Ogłoszeń" {
+    usecase "Rejestracja" as UC_REG
+    usecase "Logowanie" as UC_LOG
+    usecase "Przeglądanie ogłoszeń" as UC_VIEW
+    usecase "Filtrowanie ogłoszeń" as UC_FILTER
+    usecase "Sortowanie ogłoszeń" as UC_SORT
+    usecase "Dodawanie ogłoszenia" as UC_ADD
+    usecase "Edycja własnego ogłoszenia" as UC_EDIT
+    usecase "Usuwanie własnego ogłoszenia" as UC_DEL
+    usecase "Usuwanie dowolnego ogłoszenia" as UC_ADMIN_DEL
+    usecase "Generowanie raportu" as UC_REPORT
+    usecase "Odbieranie powiadomień real-time" as UC_PUSH
+}
+
+Guest --> UC_REG
+Guest --> UC_LOG
+Guest --> UC_VIEW
+
+User --> UC_VIEW
+User --> UC_FILTER
+User --> UC_SORT
+User --> UC_ADD
+User --> UC_EDIT
+User --> UC_DEL
+User --> UC_REPORT
+User --> UC_PUSH
+
+Admin --> UC_VIEW
+Admin --> UC_FILTER
+Admin --> UC_ADD
+Admin --> UC_EDIT
+Admin --> UC_ADMIN_DEL
+Admin --> UC_REPORT
+
+Server --> UC_PUSH : wysyła powiadomienia
+
+UC_FILTER ..> UC_VIEW : <<extend>>
+UC_SORT ..> UC_VIEW : <<extend>>
+UC_ADD ..> UC_LOG : <<include>>
+UC_EDIT ..> UC_LOG : <<include>>
+UC_DEL ..> UC_LOG : <<include>>
+
+@enduml

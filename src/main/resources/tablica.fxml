@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<BorderPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" 
+            fx:controller="pl.tablicaogloszen.klient.KontrolerTablicy" 
+            prefWidth="1100" prefHeight="750"
+            style="-fx-background-color: #1e1e2e;">
+            
+    <!-- Panel Boczny (Dodawanie) -->
+    <left>
+        <VBox spacing="15" prefWidth="340" style="-fx-background-color: #181825; -fx-padding: 25;">
+            
+            <Label text="✨ Nowe Ogłoszenie" styleClass="subheader-label"/>
+            <Separator/>
+            
+            <VBox spacing="6">
+                <Label text="Tytuł" style="-fx-font-weight: bold;"/>
+                <TextField fx:id="poleTytul" promptText="Co chcesz ogłosić?" prefHeight="40"/>
+            </VBox>
+            
+            <VBox spacing="6">
+                <Label text="Kategoria" style="-fx-font-weight: bold;"/>
+                <ComboBox fx:id="comboKategoria" promptText="Wybierz kategorię" maxWidth="Infinity" prefHeight="40"/>
+            </VBox>
+            
+            <VBox spacing="6">
+                <Label text="Dane kontaktowe" style="-fx-font-weight: bold;"/>
+                <TextField fx:id="poleDaneKontaktowe" promptText="Tel, email..." prefHeight="40"/>
+            </VBox>
+            
+            <VBox spacing="6" VBox.vgrow="ALWAYS">
+                <Label text="Treść" style="-fx-font-weight: bold;"/>
+                <TextArea fx:id="poleTresc" promptText="Opisz szczegóły..." wrapText="true" VBox.vgrow="ALWAYS"/>
+            </VBox>
+            
+            <Button text="🚀 OPUBLIKUJ" onAction="#dodajOgloszenie" maxWidth="Infinity" prefHeight="45"/>
+            
+            <Separator/>
+            
+            <Button text="📄 Pobierz Raport" onAction="#generujRaport" maxWidth="Infinity" prefHeight="38" styleClass="secondary-button"/>
+            
+        </VBox>
+    </left>
+    
+    <!-- Główny obszar -->
+    <center>
+        <VBox spacing="15" style="-fx-padding: 25;">
+            
+            <!-- Nagłówek -->
+            <HBox alignment="CENTER_LEFT" spacing="15">
+                <Label text="📋 Tablica Ogłoszeń" styleClass="header-label"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Label fx:id="etykietaRola" style="-fx-text-fill: #cba6f7; -fx-font-weight: bold;"/>
+            </HBox>
+            
+            <!-- Filtry -->
+            <FlowPane hgap="10" vgap="10" alignment="CENTER_LEFT" style="-fx-padding: 10; -fx-background-color: #313244; -fx-background-radius: 8;">
+                <Label text="🔍 Filtruj:" style="-fx-font-weight: bold;"/>
+                <ComboBox fx:id="filtrKategoria" promptText="Kategoria" prefWidth="140" prefHeight="35"/>
+                <TextField fx:id="filtrAutor" promptText="Autor" prefWidth="120" prefHeight="35"/>
+                <TextField fx:id="filtrTekst" promptText="Szukaj w treści..." prefWidth="150" prefHeight="35"/>
+                <ComboBox fx:id="filtrSortowanie" promptText="Sortuj" prefWidth="140" prefHeight="35"/>
+                <Button text="Filtruj" onAction="#zastosujFiltr" prefHeight="35"/>
+                <Button text="Wyczyść" onAction="#wyczyscFiltr" prefHeight="35" styleClass="secondary-button"/>
+                <Region prefWidth="50" HBox.hgrow="ALWAYS"/> 
+                <Button text="🔄" onAction="#odswiezListe" prefHeight="35" styleClass="secondary-button"/>
+            </FlowPane>
+            
+            <!-- Lista ogłoszeń -->
+            <ListView fx:id="listaOgloszen" VBox.vgrow="ALWAYS"/>
+            
+        </VBox>
+    </center>
+    
+</BorderPane>

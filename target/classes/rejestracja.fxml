@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<StackPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" 
+           fx:controller="pl.tablicaogloszen.klient.KontrolerRejestracji" 
+           prefWidth="450" prefHeight="620"
+           style="-fx-background-color: #1e1e2e;">
+           
+    <VBox alignment="CENTER" spacing="18" maxWidth="360" styleClass="ad-card">
+        <padding><Insets top="45" right="40" bottom="45" left="40"/></padding>
+        
+        <Label text="🎉 Utwórz Konto" styleClass="header-label"/>
+        <Label text="Dołącz do społeczności ogłoszeniowej" style="-fx-text-fill: #a6adc8; -fx-font-size: 13px;"/>
+        
+        <Region prefHeight="10"/>
+        
+        <VBox spacing="8" alignment="CENTER_LEFT">
+            <Label text="Login" style="-fx-font-weight: bold;"/>
+            <TextField fx:id="poleLogin" promptText="Wymyśl unikalny login" prefHeight="45"/>
+        </VBox>
+        
+        <VBox spacing="8" alignment="CENTER_LEFT">
+            <Label text="Hasło" style="-fx-font-weight: bold;"/>
+            <PasswordField fx:id="poleHaslo" promptText="Wpisz hasło" prefHeight="45"/>
+        </VBox>
+        
+        <VBox spacing="8" alignment="CENTER_LEFT">
+            <Label text="Powtórz hasło" style="-fx-font-weight: bold;"/>
+            <PasswordField fx:id="polePowtorzHaslo" promptText="Powtórz hasło" prefHeight="45"/>
+        </VBox>
+        
+        <Region prefHeight="10"/>
+        
+        <Button text="ZAREJESTRUJ SIĘ" onAction="#zarejestruj" maxWidth="Infinity" prefHeight="48" 
+                style="-fx-font-size: 15px; -fx-background-color: linear-gradient(to right, #cba6f7, #f5c2e7); -fx-text-fill: #1e1e2e;"/>
+        
+        <HBox alignment="CENTER" spacing="5">
+            <Label text="Masz już konto?" style="-fx-font-size: 13px;"/>
+            <Hyperlink text="Zaloguj się" onAction="#wrocDoLogowania"/>
+        </HBox>
+        
+        <Label fx:id="etykietaInfo" wrapText="true" textAlignment="CENTER" style="-fx-text-fill: #f38ba8; -fx-font-size: 13px;"/>
+    </VBox>
+    
+</StackPane>
