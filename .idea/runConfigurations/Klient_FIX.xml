@@ -1,0 +1,10 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Klient (Bez Ostrzeżeń)" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="pl.tablicaogloszen.klient.Start" />
+    <module name="sieciowa-tablica" />
+    <option name="VM_PARAMETERS" value="--enable-native-access=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.desktop/java.awt=ALL-UNNAMED --add-opens java.graphics/com.sun.glass.ui=ALL-UNNAMED --add-opens java.graphics/com.sun.javafx.tk=ALL-UNNAMED --add-exports java.base/sun.nio.ch=ALL-UNNAMED" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

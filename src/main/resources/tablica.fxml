@@ -11,9 +11,9 @@
             
     <!-- Panel Boczny (Dodawanie) -->
     <left>
-        <VBox spacing="15" prefWidth="340" style="-fx-background-color: #181825; -fx-padding: 25;">
+        <VBox spacing="15" prefWidth="340" style="-fx-background-color: rgba(43, 29, 14, 0.85); -fx-padding: 25; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 10, 0, 5, 0);">
             
-            <Label text="✨ Nowe Ogłoszenie" styleClass="subheader-label"/>
+            <Label text="✨ Nowe Zlecenie" styleClass="subheader-label"/>
             <Separator/>
             
             <VBox spacing="6">
@@ -36,11 +36,11 @@
                 <TextArea fx:id="poleTresc" promptText="Opisz szczegóły..." wrapText="true" VBox.vgrow="ALWAYS"/>
             </VBox>
             
-            <Button text="🚀 OPUBLIKUJ" onAction="#dodajOgloszenie" maxWidth="Infinity" prefHeight="45"/>
+            <Button text="⚔ PRZYPNIJ" onAction="#dodajOgloszenie" maxWidth="Infinity" prefHeight="45"/>
             
             <Separator/>
             
-            <Button text="📄 Pobierz Raport" onAction="#generujRaport" maxWidth="Infinity" prefHeight="38" styleClass="secondary-button"/>
+            <Button text="📜 Spisz Raport" onAction="#generujRaport" maxWidth="Infinity" prefHeight="38" styleClass="secondary-button"/>
             
         </VBox>
     </left>
@@ -50,21 +50,22 @@
         <VBox spacing="15" style="-fx-padding: 25;">
             
             <!-- Nagłówek -->
-            <HBox alignment="CENTER_LEFT" spacing="15">
-                <Label text="📋 Tablica Ogłoszeń" styleClass="header-label"/>
+            <HBox alignment="CENTER_LEFT" spacing="15" style="-fx-padding: 0 0 10 0;">
+                <Label text="Tablica Ogłoszeń" styleClass="header-label"/>
                 <Region HBox.hgrow="ALWAYS"/>
-                <Label fx:id="etykietaRola" style="-fx-text-fill: #cba6f7; -fx-font-weight: bold;"/>
+                <Label fx:id="etykietaRola" style="-fx-text-fill: #c5a557; -fx-font-weight: bold; -fx-font-size: 16px;"/>
+                <Button text="Wyloguj" onAction="#wyloguj" styleClass="secondary-button"/>
             </HBox>
             
             <!-- Filtry -->
-            <FlowPane hgap="10" vgap="10" alignment="CENTER_LEFT" style="-fx-padding: 10; -fx-background-color: #313244; -fx-background-radius: 8;">
-                <Label text="🔍 Filtruj:" style="-fx-font-weight: bold;"/>
+            <FlowPane hgap="10" vgap="10" alignment="CENTER_LEFT" style="-fx-padding: 10; -fx-background-color: rgba(43, 29, 14, 0.7); -fx-background-radius: 8; -fx-border-color: #c5a557; -fx-border-width: 1;">
+                <Label text="🔍 Wypatruj:" style="-fx-font-weight: bold;"/>
                 <ComboBox fx:id="filtrKategoria" promptText="Kategoria" prefWidth="140" prefHeight="35"/>
                 <TextField fx:id="filtrAutor" promptText="Autor" prefWidth="120" prefHeight="35"/>
                 <TextField fx:id="filtrTekst" promptText="Szukaj w treści..." prefWidth="150" prefHeight="35"/>
                 <ComboBox fx:id="filtrSortowanie" promptText="Sortuj" prefWidth="140" prefHeight="35"/>
-                <Button text="Filtruj" onAction="#zastosujFiltr" prefHeight="35"/>
-                <Button text="Wyczyść" onAction="#wyczyscFiltr" prefHeight="35" styleClass="secondary-button"/>
+                <Button text="Szukaj" onAction="#zastosujFiltr" prefHeight="35"/>
+                <Button text="Odnowa" onAction="#wyczyscFiltr" prefHeight="35" styleClass="secondary-button"/>
                 <Region prefWidth="50" HBox.hgrow="ALWAYS"/> 
                 <Button text="🔄" onAction="#odswiezListe" prefHeight="35" styleClass="secondary-button"/>
             </FlowPane>

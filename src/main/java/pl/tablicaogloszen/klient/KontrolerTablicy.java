@@ -253,6 +253,16 @@ public class KontrolerTablicy {
         }).start();
     }
 
+    @FXML
+    private void wyloguj() {
+        Sesja.wyloguj();
+        try {
+            AplikacjaKlienta.zaladujWidok("logowanie");
+        } catch (Exception e) {
+            utworzAlert(Alert.AlertType.ERROR, "Błąd wylogowywania: " + e.getMessage());
+        }
+    }
+
     private void edytujOgloszenie(OgloszenieDTO item) {
         Dialog<OgloszenieDTO> dialog = new Dialog<>();
         dialog.setTitle("Edycja");
