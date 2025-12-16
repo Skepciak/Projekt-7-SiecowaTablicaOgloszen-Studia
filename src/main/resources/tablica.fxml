@@ -58,20 +58,24 @@
             </HBox>
             
             <!-- Filtry -->
-            <FlowPane hgap="10" vgap="10" alignment="CENTER_LEFT" style="-fx-padding: 10; -fx-background-color: rgba(43, 29, 14, 0.7); -fx-background-radius: 8; -fx-border-color: #c5a557; -fx-border-width: 1;">
-                <Label text="🔍 Wypatruj:" style="-fx-font-weight: bold;"/>
-                <ComboBox fx:id="filtrKategoria" promptText="Kategoria" prefWidth="140" prefHeight="35"/>
-                <TextField fx:id="filtrAutor" promptText="Autor" prefWidth="120" prefHeight="35"/>
-                <TextField fx:id="filtrTekst" promptText="Szukaj w treści..." prefWidth="150" prefHeight="35"/>
-                <ComboBox fx:id="filtrSortowanie" promptText="Sortuj" prefWidth="140" prefHeight="35"/>
-                <Button text="Szukaj" onAction="#zastosujFiltr" prefHeight="35"/>
-                <Button text="Odnowa" onAction="#wyczyscFiltr" prefHeight="35" styleClass="secondary-button"/>
-                <Region prefWidth="50" HBox.hgrow="ALWAYS"/> 
+            <HBox alignment="CENTER_LEFT" spacing="10" style="-fx-padding: 10; -fx-background-color: rgba(43, 29, 14, 0.7); -fx-background-radius: 8; -fx-border-color: #c5a557; -fx-border-width: 1;">
+                <FlowPane hgap="10" vgap="10" alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
+                    <Label text="🔍 Wypatruj:" style="-fx-font-weight: bold;"/>
+                    <ComboBox fx:id="filtrKategoria" promptText="Kategoria" prefWidth="140" prefHeight="35"/>
+                    <TextField fx:id="filtrAutor" promptText="Autor" prefWidth="120" prefHeight="35"/>
+                    <TextField fx:id="filtrTekst" promptText="Szukaj w treści..." prefWidth="150" prefHeight="35"/>
+                    <ComboBox fx:id="filtrSortowanie" promptText="Sortuj" prefWidth="140" prefHeight="35"/>
+                    <Button text="Szukaj" onAction="#zastosujFiltr" prefHeight="35"/>
+                    <Button text="Odnowa" onAction="#wyczyscFiltr" prefHeight="35" styleClass="secondary-button"/>
+                </FlowPane>
                 <Button text="🔄" onAction="#odswiezListe" prefHeight="35" styleClass="secondary-button"/>
-            </FlowPane>
+            </HBox>
             
-            <!-- Lista ogłoszeń -->
-            <ListView fx:id="listaOgloszen" VBox.vgrow="ALWAYS"/>
+            <!-- Tablica Korkowa (Siatka) -->
+            <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" styleClass="contract-scroll-pane" hbarPolicy="NEVER">
+                <FlowPane fx:id="kontenerOgloszen" hgap="30" vgap="30" prefWrapLength="800"
+                          style="-fx-padding: 30; -fx-alignment: top-left;" />
+            </ScrollPane>
             
         </VBox>
     </center>

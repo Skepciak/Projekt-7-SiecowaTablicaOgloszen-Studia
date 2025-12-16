@@ -5,10 +5,15 @@
 /* === OGÓLNE === */
 .root {
     -fx-background-image: url("wood_texture.png");
+    background-image: url("wood_texture.png");
     -fx-background-repeat: repeat;
+    background-repeat: repeat;
     -fx-background-size: contain;
+    background-size: contain;
     -fx-font-family: 'Georgia', 'Times New Roman', serif;
+    font-family: 'Georgia', 'Times New Roman', serif;
     -fx-font-size: 14px;
+    font-size: 14px;
     -fx-text-fill: #e0d0b0;
     /* Jasny pergaminowy kolor tekstu na ciemnym tle */
 }
@@ -17,12 +22,15 @@
 .label {
     -fx-text-fill: #f5e6c4;
     -fx-font-weight: bold;
+    font-weight: bold;
     -fx-effect: dropshadow(one-pass-box, rgba(0, 0, 0, 0.8), 2, 0, 1, 1);
 }
 
 .header-label {
     -fx-font-size: 28px;
+    font-size: 28px;
     -fx-font-family: 'Cinzel', 'Georgia', serif;
+    font-family: 'Cinzel', 'Georgia', serif;
     -fx-text-fill: #c5a557;
     /* Złoty */
     -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.9), 5, 0, 2, 2);
@@ -30,11 +38,15 @@
 
 .subheader-label {
     -fx-font-size: 20px;
+    font-size: 20px;
     -fx-text-fill: #a63434;
     /* Ciemna czerwień */
     -fx-border-color: transparent transparent #c5a557 transparent;
+    border-color: transparent transparent #c5a557 transparent;
     -fx-border-width: 2;
+    border-width: 2;
     -fx-padding: 0 0 5 0;
+    padding: 0 0 5 0;
 }
 
 /* === POLA TEKSTOWE === */
@@ -42,145 +54,195 @@
 .password-field,
 .text-area {
     -fx-background-image: url("parchment_texture.png");
+    background-image: url("parchment_texture.png");
     -fx-background-repeat: repeat;
+    background-repeat: repeat;
     -fx-background-color: #dcd0b0;
+    background-color: #dcd0b0;
     /* Fallback */
     -fx-text-fill: #2b1d0e;
     /* Ciemny brąz */
     -fx-prompt-text-fill: #5c4033;
     -fx-background-radius: 5;
     -fx-border-color: #c5a557;
+    border-color: #c5a557;
     /* Złota ramka */
     -fx-border-radius: 5;
+    border-radius: 5px;
     -fx-border-width: 2;
+    border-width: 2;
     -fx-padding: 8 10;
+    padding: 8 10;
     -fx-font-family: 'Georgia', serif;
+    font-family: 'Georgia', serif;
 }
 
 .text-area .content {
     -fx-background-color: transparent;
+    background-color: transparent;
 }
 
 .text-area .viewport {
     -fx-background-color: transparent;
+    background-color: transparent;
 }
 
 .text-field:focused,
 .text-area:focused {
     -fx-border-color: #ffcc00;
+    border-color: #ffcc00;
     -fx-effect: dropshadow(three-pass-box, rgba(255, 204, 0, 0.4), 10, 0, 0, 0);
 }
 
 /* === COMBOBOX === */
 .combo-box {
     -fx-background-color: #3e2b1f;
+    background-color: #3e2b1f;
     -fx-border-color: #c5a557;
+    border-color: #c5a557;
     -fx-border-width: 2;
+    border-width: 2;
     -fx-background-radius: 4;
 }
 
 .combo-box .list-cell {
     -fx-text-fill: #f5e6c4;
     -fx-background-color: transparent;
+    background-color: transparent;
 }
 
 .combo-box .arrow {
     -fx-background-color: #c5a557;
+    background-color: #c5a557;
 }
 
 .combo-box-popup .list-view {
     -fx-background-color: #2b1d0e;
+    background-color: #2b1d0e;
     -fx-border-color: #c5a557;
+    border-color: #c5a557;
 }
 
 .combo-box-popup .list-cell {
     -fx-text-fill: #e0d0b0;
     -fx-padding: 8;
+    padding: 8px;
 }
 
 .combo-box-popup .list-cell:hover {
     -fx-background-color: #5c4033;
+    background-color: #5c4033;
 }
 
 /* === PRZYCISKI === */
 .button {
     -fx-background-color: linear-gradient(#5c4033, #3e2b1f);
+    background-color: #5c4033;
     -fx-text-fill: #c5a557;
     /* Złoty tekst */
     -fx-font-family: 'Cinzel', 'Georgia', serif;
+    font-family: 'Cinzel', 'Georgia', serif;
     -fx-font-weight: bold;
+    font-weight: bold;
     -fx-font-size: 14px;
+    font-size: 14px;
     -fx-background-radius: 0;
     -fx-border-color: #c5a557;
+    border-color: #c5a557;
     -fx-border-width: 2;
+    border-width: 2;
     -fx-border-radius: 2;
+    border-radius: 2px;
     -fx-padding: 10 20;
+    padding: 10 20;
     -fx-cursor: hand;
+    cursor: pointer;
     -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.6), 5, 0, 0, 2);
 }
 
 .button:hover {
     -fx-background-color: linear-gradient(#7a5542, #5c4033);
+    background-color: #7a5542;
     -fx-text-fill: #ffcc00;
     -fx-border-color: #ffcc00;
+    border-color: #ffcc00;
 }
 
 .button:pressed {
     -fx-background-color: #2b1d0e;
+    background-color: #2b1d0e;
     -fx-effect: innerShadow(three-pass-box, rgba(0, 0, 0, 0.6), 5, 0, 0, 0);
 }
 
 .secondary-button {
     -fx-background-color: linear-gradient(#2b1d0e, #1a1108);
+    background-color: #2b1d0e;
     -fx-text-fill: #a63434;
     /* Czerwony tekst - np. Wyloguj */
     -fx-border-color: #7a5542;
+    border-color: #7a5542;
 }
 
 .danger-button {
     -fx-text-fill: #ff4444;
     -fx-border-color: #8a0b0b;
+    border-color: #8a0b0b;
 }
 
 /* === LISTA OGŁOSZEŃ === */
 .list-view {
     -fx-background-color: transparent;
+    background-color: transparent;
     -fx-padding: 10;
+    padding: 10px;
 }
 
 .list-view .list-cell {
     -fx-background-color: transparent;
+    background-color: transparent;
     -fx-padding: 5;
+    padding: 5px;
 }
 
 .list-view .list-cell:selected,
 .list-view .list-cell:focused {
     -fx-background-color: transparent;
+    background-color: transparent;
 }
 
 /* === KARTY OGŁOSZEŃ (Pinned Notes) === */
 .ad-card {
     -fx-background-image: url("parchment_texture.png");
+    background-image: url("parchment_texture.png");
     -fx-background-repeat: repeat;
+    background-repeat: repeat;
     -fx-background-radius: 2;
     /* Szarpane krawędzie symulowane */
     -fx-padding: 20;
+    padding: 20px;
     -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.8), 8, 0, 3, 3);
     -fx-border-color: transparent;
+    border-color: transparent;
 }
 
 /* "Gwóźdź" przypinający ogłoszenie - symulacja borderem u góry */
 .ad-card {
     -fx-border-color: #3e2b1f;
+    border-color: #3e2b1f;
     /* Ciemny "gwóźdź" */
     -fx-border-width: 4 0 0 0;
+    border-width: 4 0 0 0;
     -fx-border-style: solid;
+    border-style: solid;
 }
 
 .ad-title {
     -fx-font-size: 22px;
+    font-size: 22px;
     -fx-font-family: 'Cinzel', 'Georgia', serif;
+    font-family: 'Cinzel', 'Georgia', serif;
     -fx-font-weight: bold;
+    font-weight: bold;
     -fx-text-fill: #3e2b1f;
     /* Ciemny atrament */
     -fx-effect: none;
@@ -188,56 +250,246 @@
 
 .ad-category {
     -fx-background-color: #8a0b0b;
+    background-color: #8a0b0b;
     /* Czerwony wosk */
     -fx-background-radius: 10;
     -fx-padding: 2 10;
+    padding: 2 10;
     -fx-text-fill: #e0d0b0;
     -fx-font-size: 12px;
+    font-size: 12px;
     -fx-font-weight: bold;
+    font-weight: bold;
     -fx-effect: dropshadow(one-pass-box, rgba(0, 0, 0, 0.5), 2, 0, 0, 1);
 }
 
 .ad-content {
     -fx-text-fill: #2b1d0e;
     -fx-font-size: 16px;
+    font-size: 16px;
     -fx-font-style: italic;
+    font-style: italic;
     -fx-effect: none;
 }
 
 .ad-meta {
     -fx-text-fill: #5c4033;
     -fx-font-size: 13px;
+    font-size: 13px;
     -fx-effect: none;
 }
 
 /* === SCROLLBAR === */
 .scroll-bar .track {
     -fx-background-color: #2b1d0e;
+    background-color: #2b1d0e;
 }
 
 .scroll-bar .thumb {
     -fx-background-color: #c5a557;
+    background-color: #c5a557;
     -fx-background-radius: 0;
     -fx-border-color: #3e2b1f;
+    border-color: #3e2b1f;
 }
 
 /* === SEPARATOR === */
 .separator .line {
     -fx-border-color: #c5a557;
+    border-color: #c5a557;
     -fx-border-style: dashed;
+    border-style: dashed;
 }
 
 /* === DIALOG === */
 .dialog-pane {
     -fx-background-image: url("wood_texture.png");
+    background-image: url("wood_texture.png");
+    -fx-background-repeat: repeat;
+    background-repeat: repeat;
     -fx-border-color: #c5a557;
+    border-color: #c5a557;
     -fx-border-width: 4;
+    border-width: 4;
 }
 
 .dialog-pane .header-panel {
-    -fx-background-color: rgba(0, 0, 0, 0.5);
+    -fx-background-color: rgba(62, 43, 31, 0.9);
+    background-color: rgba(62, 43, 31, 0.9);
+    -fx-padding: 15;
+    padding: 15px;
+    -fx-border-color: #c5a557;
+    border-color: #c5a557;
+    -fx-border-width: 0 0 2 0;
+    border-width: 0 0 2 0;
+    -fx-border-style: solid;
+    border-style: solid;
 }
 
-.dialog-pane .label {
-    -fx-text-fill: #e0d0b0;
+.dialog-pane .header-panel .label {
+    -fx-font-family: 'Cinzel', 'Georgia', serif;
+    font-family: 'Cinzel', 'Georgia', serif;
+    -fx-font-size: 20px;
+    font-size: 20px;
+    -fx-text-fill: #c5a557;
+}
+
+.dialog-pane .content {
+    -fx-padding: 20;
+    padding: 20px;
+    -fx-background-color: transparent;
+    /* Content transparent to show wood or card */
+    background-color: transparent;
+}
+
+/* Przyciski w dialogach */
+.dialog-pane .button-bar .button {
+    -fx-background-color: linear-gradient(#5c4033, #3e2b1f);
+    background-color: #5c4033;
+    -fx-text-fill: #c5a557;
+    -fx-border-color: #c5a557;
+    border-color: #c5a557;
+    -fx-font-size: 13px;
+    font-size: 13px;
+}
+
+.dialog-pane .button-bar .button:hover {
+    -fx-background-color: #7a5542;
+    background-color: #7a5542;
+    -fx-text-fill: #ffcc00;
+}
+
+/* === PRZYCISKI AKCJI (WISZĄCE PERGAMINY) === */
+.action-icon-button {
+    -fx-background-image: url("parchment_texture.png");
+    background-image: url("parchment_texture.png");
+    -fx-background-repeat: repeat;
+    background-repeat: repeat;
+    -fx-background-color: #dcd0b0;
+    background-color: #dcd0b0;
+    -fx-text-fill: #3e2b1f;
+    /* Ciemny atrament */
+    -fx-font-family: 'Cinzel', 'Georgia', serif;
+    font-family: 'Cinzel', 'Georgia', serif;
+    -fx-font-weight: bold;
+    font-weight: bold;
+    -fx-font-size: 13px;
+    font-size: 13px;
+    -fx-background-radius: 3;
+    -fx-border-color: rgba(62, 43, 31, 0.4);
+    border-color: rgba(62, 43, 31, 0.4);
+    /* Lekki obrys atramentu */
+    -fx-border-width: 1;
+    border-width: 1;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.6), 4, 1, 2, 2);
+    /* Cień rzucany na tablicę */
+    -fx-cursor: hand;
+    cursor: pointer;
+    -fx-padding: 5 12;
+    padding: 5 12;
+    -fx-min-width: 80px;
+    min-width: 80px;
+    -fx-alignment: center;
+}
+
+.action-icon-button:hover {
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.8), 6, 1, 2, 3);
+    -fx-translate-y: -1;
+    /* Lekkie uniesienie */
+    -fx-background-color: #eaddcf;
+    background-color: #eaddcf;
+    /* Jaśniejszy pergamin */
+}
+
+.action-icon-button:pressed {
+    -fx-translate-y: 1;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.4), 2, 0, 1, 1);
+}
+
+.edit-button {
+    -fx-rotate: -2;
+    rotate: -2deg;
+    /* Lekki obrót dla naturalności */
+}
+
+.delete-button {
+    -fx-rotate: 2;
+    rotate: 2deg;
+    -fx-text-fill: #8a0b0b;
+    /* Czerwony atrament dla usuwania */
+}
+
+/* === NOWY UKŁAD SIATKOWY (CONTRACT GRID) === */
+
+.contract-scroll-pane {
+    -fx-background: transparent;
+    background: transparent;
+    -fx-background-color: transparent;
+    background-color: transparent;
+}
+
+.contract-scroll-pane .viewport {
+    -fx-background-color: transparent;
+    background-color: transparent;
+}
+
+.contract-note {
+    -fx-background-image: url("parchment_texture.png");
+    background-image: url("parchment_texture.png");
+    -fx-background-repeat: repeat;
+    background-repeat: repeat;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.7), 10, 0, 4, 4);
+    -fx-padding: 15;
+    padding: 15px;
+    -fx-min-width: 280px;
+    min-width: 280px;
+    -fx-max-width: 280px;
+    max-width: 280px;
+    -fx-min-height: 250px;
+    min-height: 250px;
+    /* Stała wysokość lub elastyczna */
+    -fx-border-color: transparent;
+    border-color: transparent;
+}
+
+.contract-note:hover {
+    -fx-scale-x: 1.02;
+    transform: scale(1.02);
+    -fx-scale-y: 1.02;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.8), 15, 0, 6, 6);
+}
+
+.contract-header {
+    -fx-alignment: center;
+    -fx-border-color: #3e2b1f;
+    border-color: #3e2b1f;
+    -fx-border-width: 0 0 1 0;
+    border-width: 0 0 1 0;
+    -fx-border-style: solid;
+    border-style: solid;
+    -fx-padding: 0 0 10 0;
+    padding: 0 0 10 0;
+    -fx-margin: 0 0 10 0;
+    margin: 0 0 10px 0;
+}
+
+.contract-title {
+    -fx-font-family: 'Cinzel', 'Georgia', serif;
+    font-family: 'Cinzel', 'Georgia', serif;
+    -fx-font-size: 18px;
+    font-size: 18px;
+    -fx-font-weight: bold;
+    font-weight: bold;
+    -fx-text-fill: #2b1d0e;
+    -fx-wrap-text: true;
+    -fx-text-alignment: center;
+}
+
+.pin-icon {
+    -fx-font-size: 24px;
+    font-size: 24px;
+    -fx-text-alignment: center;
+    -fx-font-family: 'Segoe UI Emoji', 'Apple Color Emoji', sans-serif;
+    font-family: 'Segoe UI Emoji', 'Apple Color Emoji', sans-serif;
+    -fx-translate-y: -25;
 }

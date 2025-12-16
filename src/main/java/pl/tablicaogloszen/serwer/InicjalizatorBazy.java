@@ -55,8 +55,30 @@ public class InicjalizatorBazy {
             }
 
             // 5. Dodaj admina
+            String adminPass = Bezpieczenstwo.hashuj("admin");
             wykonajSQL(pol,
-                    "INSERT IGNORE INTO uzytkownicy (login, haslo_hash, rola) VALUES ('admin', 'admin', 'ADMIN')");
+                    "INSERT IGNORE INTO uzytkownicy (login, haslo_hash, rola) VALUES ('admin', '" + adminPass
+                            + "', 'ADMIN')");
+
+            // 5a. MIGRACJA HASEŁ (Fix dla istniejących kont)
+            try (Statement st = pol.createStatement();
+                    ResultSet rs = st.executeQuery("SELECT id, haslo_hash FROM uzytkownicy")) {
+                while (rs.next()) {
+                    int id = rs.getInt("id");
+                    String currentHash = rs.getString("haslo_hash");
+                    // Jeśli hasło nie wygląda jak SHA-256 (64 znaki hex), to zahashuj je
+                    if (currentHash != null && currentHash.length() != 64) {
+                        String newHash = Bezpieczenstwo.hashuj(currentHash);
+                        try (PreparedStatement pstUpdate = pol
+                                .prepareStatement("UPDATE uzytkownicy SET haslo_hash = ? WHERE id = ?")) {
+                            pstUpdate.setString(1, newHash);
+                            pstUpdate.setInt(2, id);
+                            pstUpdate.executeUpdate();
+                            System.out.println("   ! Zaktualizowano hasło dla ID: " + id);
+                        }
+                    }
+                }
+            }
 
             // 6. Dodaj kategorie
             String[] kategorie = { "Motoryzacja", "Elektronika", "Nieruchomości", "Praca", "Usługi", "Inne" };

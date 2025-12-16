@@ -53,7 +53,11 @@ public class AplikacjaKlienta extends Application {
         String css = AplikacjaKlienta.class.getResource("/style.css").toExternalForm();
         root.getStylesheets().add(css);
 
-        glownaScena.setScene(new Scene(root));
+        if (glownaScena.getScene() == null) {
+            glownaScena.setScene(new Scene(root));
+        } else {
+            glownaScena.getScene().setRoot(root);
+        }
     }
 
     /**

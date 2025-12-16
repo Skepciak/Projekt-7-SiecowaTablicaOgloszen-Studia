@@ -23,14 +23,14 @@ public class UzytkownikDAO {
      * @return true jeśli rejestracja zakończyła się sukcesem, false w przypadku
      *         błędu
      */
-    public boolean zarejestruj(String login, String hasloHash) {
+    public boolean zarejestruj(String login, String haslo) {
         String sql = "INSERT INTO uzytkownicy (login, haslo_hash) VALUES (?, ?)";
 
         try (Connection pol = PolaczenieBazy.pobierzPolaczenie();
                 PreparedStatement pstm = pol.prepareStatement(sql)) {
 
             pstm.setString(1, login);
-            pstm.setString(2, hasloHash);
+            pstm.setString(2, Bezpieczenstwo.hashuj(haslo));
 
             int wynik = pstm.executeUpdate();
             return wynik > 0;
@@ -43,18 +43,18 @@ public class UzytkownikDAO {
     /**
      * Weryfikuje dane logowania użytkownika.
      * 
-     * @param login     Login użytkownika
-     * @param hasloHash Hasło do weryfikacji
+     * @param login Login użytkownika
+     * @param haslo Hasło do weryfikacji
      * @return DTO użytkownika jeśli dane są poprawne, null w przeciwnym razie
      */
-    public UzytkownikDTO zaloguj(String login, String hasloHash) {
+    public UzytkownikDTO zaloguj(String login, String haslo) {
         String sql = "SELECT id, rola FROM uzytkownicy WHERE login = ? AND haslo_hash = ?";
 
         try (Connection pol = PolaczenieBazy.pobierzPolaczenie();
                 PreparedStatement pstm = pol.prepareStatement(sql)) {
 
             pstm.setString(1, login);
-            pstm.setString(2, hasloHash);
+            pstm.setString(2, Bezpieczenstwo.hashuj(haslo));
 
             ResultSet rs = pstm.executeQuery();
             if (rs.next()) {
