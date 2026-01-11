@@ -18,17 +18,9 @@ import java.util.List;
 import java.util.Random;
 
 public class KontrolerTablicy {
-    @FXML
-    private TextField poleTytul;
-    @FXML
-    private TextArea poleTresc;
-    @FXML
-    private TextField poleDaneKontaktowe;
-    @FXML
-    private ComboBox<String> comboKategoria;
 
     @FXML
-    private FlowPane kontenerOgloszen; // ZMIANA: FlowPane zamiast ListView
+    private FlowPane kontenerOgloszen; // FlowPane dla siatki pergaminów
 
     @FXML
     private ComboBox<String> filtrKategoria;
@@ -42,6 +34,9 @@ public class KontrolerTablicy {
     private Label etykietaRola;
 
     private final Random random = new Random();
+
+    // Lista kategorii do użycia w dialogach
+    private List<String> listaKategorii;
 
     public void initialize() {
         pobierzKategorie();
@@ -59,12 +54,17 @@ public class KontrolerTablicy {
         odswiezListe();
     }
 
+    /**
+     * Tworzy kartę pergaminową (małą karteczkę przypiętą do tablicy)
+     */
     private VBox utworzKarteOgloszenia(OgloszenieDTO item) {
-        VBox card = new VBox(5); // Mniejszy odstęp
-        card.getStyleClass().add("contract-note"); // Nowa klasa CSS
+        VBox card = new VBox(8);
+        card.getStyleClass().add("contract-note");
+        card.setPrefWidth(280);
+        card.setMinHeight(220);
 
         // Losowa rotacja dla naturalnego efektu
-        double angle = random.nextDouble() * 6 - 3; // -3 do 3 stopni
+        double angle = random.nextDouble() * 4 - 2; // -2 do 2 stopni
         card.setRotate(angle);
 
         // Ikona Pinezki
@@ -72,15 +72,10 @@ public class KontrolerTablicy {
         pin.getStyleClass().add("pin-icon");
 
         // Nagłówek (Tytuł)
-        VBox headerBox = new VBox();
-        headerBox.getStyleClass().add("contract-header");
-        headerBox.setAlignment(Pos.CENTER);
-
         Label titleLabel = new Label(item.getTytul());
         titleLabel.getStyleClass().add("contract-title");
         titleLabel.setWrapText(true);
         titleLabel.setAlignment(Pos.CENTER);
-        headerBox.getChildren().add(titleLabel);
 
         // Kategoria i Data
         HBox metaBox = new HBox(10);
@@ -101,8 +96,7 @@ public class KontrolerTablicy {
         Label contentLabel = new Label(item.getTresc());
         contentLabel.setWrapText(true);
         contentLabel.getStyleClass().add("ad-content");
-        contentLabel.setMaxHeight(Double.MAX_VALUE);
-        contentLabel.setAlignment(Pos.TOP_LEFT);
+        contentLabel.setMaxHeight(80);
         VBox.setVgrow(contentLabel, Priority.ALWAYS);
 
         // Kontakt
@@ -111,6 +105,7 @@ public class KontrolerTablicy {
         if (item.getDaneKontaktowe() != null && !item.getDaneKontaktowe().isEmpty()) {
             Label kontaktLabel = new Label("📞 " + item.getDaneKontaktowe());
             kontaktLabel.getStyleClass().add("ad-meta");
+            kontaktLabel.setStyle("-fx-font-size: 11px;");
             kontaktBox.getChildren().add(kontaktLabel);
         }
 
@@ -119,7 +114,7 @@ public class KontrolerTablicy {
         // Stopka (Autor + Przyciski)
         HBox footer = new HBox(5);
         footer.setAlignment(Pos.CENTER_LEFT);
-        Label authorLabel = new Label("� " + item.getAutor());
+        Label authorLabel = new Label("👤 " + item.getAutor());
         authorLabel.getStyleClass().add("ad-meta");
 
         Region spacer = new Region();
@@ -127,14 +122,14 @@ public class KontrolerTablicy {
 
         footer.getChildren().addAll(authorLabel, spacer);
 
-        // Przyciski edycji/usuwania (teraz na dole, bo to małe karteczki)
+        // Przyciski edycji/usuwania
         UzytkownikDTO zalogowany = Sesja.getZalogowanyUzytkownik();
         if (zalogowany != null) {
             boolean czyAdmin = "ADMIN".equals(zalogowany.getRola());
             boolean czyWlasciciel = item.getIdAutora() == zalogowany.getId();
 
             if (czyWlasciciel || czyAdmin) {
-                Button btnEdytuj = new Button("📝"); // Ikona zamiast tekstu by oszczędzić miejsce
+                Button btnEdytuj = new Button("📝");
                 btnEdytuj.getStyleClass().addAll("action-icon-button", "edit-button");
                 btnEdytuj.setTooltip(new Tooltip("Edytuj"));
                 btnEdytuj.setOnAction(e -> edytujOgloszenie(item));
@@ -149,7 +144,7 @@ public class KontrolerTablicy {
         }
 
         // Składanie całości
-        card.getChildren().addAll(pin, headerBox, metaBox, contentLabel, kontaktBox, separator, footer);
+        card.getChildren().addAll(pin, titleLabel, metaBox, contentLabel, kontaktBox, separator, footer);
         return card;
     }
 
@@ -160,8 +155,8 @@ public class KontrolerTablicy {
             if (odp != null && odp.getStatus() == StatusOdpowiedzi.OK) {
                 @SuppressWarnings("unchecked")
                 List<String> kategorie = (List<String>) odp.getDane();
+                listaKategorii = kategorie;
                 Platform.runLater(() -> {
-                    comboKategoria.setItems(FXCollections.observableArrayList(kategorie));
                     filtrKategoria.getItems().clear();
                     filtrKategoria.getItems().add("Wszystkie");
                     filtrKategoria.getItems().addAll(kategorie);
@@ -215,7 +210,7 @@ public class KontrolerTablicy {
         new Thread(() -> {
             Odpowiedz odp = KlientSieciowy.pobierzInstancje().wyslijISprawdz(zadanie);
             Platform.runLater(() -> {
-                kontenerOgloszen.getChildren().clear(); // Czyścimy starą listę
+                kontenerOgloszen.getChildren().clear();
                 if (odp != null) {
                     if (odp.getStatus() == StatusOdpowiedzi.OK) {
                         @SuppressWarnings("unchecked")
@@ -242,39 +237,108 @@ public class KontrolerTablicy {
         zastosujFiltr();
     }
 
+    /**
+     * Otwiera okno dialogowe do dodawania nowego ogłoszenia
+     */
     @FXML
-    private void dodajOgloszenie() {
-        String tytul = poleTytul.getText().trim();
-        String tresc = poleTresc.getText().trim();
-        String daneKontaktowe = poleDaneKontaktowe.getText().trim();
-        String kategoria = comboKategoria.getValue();
+    private void pokazDialogDodawania() {
+        Dialog<OgloszenieDTO> dialog = new Dialog<>();
+        dialog.setTitle("Nowe Zlecenie");
+        dialog.setHeaderText("📜 Przypnij nowe ogłoszenie do tablicy");
+        dialog.getDialogPane().getStylesheets().add(getClass().getResource("/style.css").toExternalForm());
+        dialog.getDialogPane().getStyleClass().add("witcher-dialog");
+        dialog.getDialogPane().setPrefWidth(500);
 
-        if (tytul.isEmpty() || kategoria == null) {
-            utworzAlert(Alert.AlertType.WARNING, "Uzupełnij tytuł i kategorię.");
-            return;
+        ButtonType przypnijButton = new ButtonType("⚔ Przypnij", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(przypnijButton, ButtonType.CANCEL);
+
+        // Zawartość dialogu w stylu pergaminu
+        VBox content = new VBox(15);
+        content.setPadding(new Insets(20));
+        content.getStyleClass().add("ad-card");
+
+        // Tytuł
+        VBox tytulBox = new VBox(5);
+        Label lblTytul = new Label("Tytuł zlecenia:");
+        lblTytul.setStyle("-fx-font-weight: bold; -fx-text-fill: #2b1d0e;");
+        TextField poleTytul = new TextField();
+        poleTytul.setPromptText("Np. Kontrakt: Gryf w okolicy...");
+        poleTytul.setPrefHeight(40);
+        tytulBox.getChildren().addAll(lblTytul, poleTytul);
+
+        // Kategoria
+        VBox kategoriaBox = new VBox(5);
+        Label lblKategoria = new Label("Kategoria:");
+        lblKategoria.setStyle("-fx-font-weight: bold; -fx-text-fill: #2b1d0e;");
+        ComboBox<String> comboKategoria = new ComboBox<>();
+        if (listaKategorii != null) {
+            comboKategoria.setItems(FXCollections.observableArrayList(listaKategorii));
         }
+        comboKategoria.setPromptText("Wybierz kategorię");
+        comboKategoria.setMaxWidth(Double.MAX_VALUE);
+        comboKategoria.setPrefHeight(40);
+        kategoriaBox.getChildren().addAll(lblKategoria, comboKategoria);
 
-        OgloszenieDTO nowe = new OgloszenieDTO(tytul, tresc, daneKontaktowe, kategoria,
-                Sesja.getZalogowanyUzytkownik().getLogin());
-        Zadanie zadanie = new Zadanie(TypZadania.DODAJ_OGLOSZENIE, nowe);
+        // Dane kontaktowe
+        VBox kontaktBox = new VBox(5);
+        Label lblKontakt = new Label("Dane kontaktowe:");
+        lblKontakt.setStyle("-fx-font-weight: bold; -fx-text-fill: #2b1d0e;");
+        TextField poleKontakt = new TextField();
+        poleKontakt.setPromptText("Karczma, imię, lokalizacja...");
+        poleKontakt.setPrefHeight(40);
+        kontaktBox.getChildren().addAll(lblKontakt, poleKontakt);
 
-        poleTytul.clear();
-        poleTresc.clear();
-        poleDaneKontaktowe.clear();
-        comboKategoria.getSelectionModel().clearSelection();
+        // Treść
+        VBox trescBox = new VBox(5);
+        Label lblTresc = new Label("Treść ogłoszenia:");
+        lblTresc.setStyle("-fx-font-weight: bold; -fx-text-fill: #2b1d0e;");
+        TextArea poleTresc = new TextArea();
+        poleTresc.setPromptText("Opisz szczegóły zlecenia, nagrodę, niebezpieczeństwo...");
+        poleTresc.setWrapText(true);
+        poleTresc.setPrefRowCount(5);
+        trescBox.getChildren().addAll(lblTresc, poleTresc);
 
-        new Thread(() -> {
-            Odpowiedz odp = KlientSieciowy.pobierzInstancje().wyslijISprawdz(zadanie);
-            Platform.runLater(() -> {
-                if (odp != null && odp.getStatus() == StatusOdpowiedzi.OK) {
-                    utworzAlert(Alert.AlertType.INFORMATION, "Ogłoszenie opublikowane!");
-                    odswiezListe(); // Odśwież widok
-                } else {
-                    utworzAlert(Alert.AlertType.ERROR,
-                            "Błąd dodawania: " + (odp != null ? odp.getWiadomosc() : "brak odpowiedzi"));
+        content.getChildren().addAll(tytulBox, kategoriaBox, kontaktBox, trescBox);
+        dialog.getDialogPane().setContent(content);
+
+        // Fokus na pierwszym polu
+        Platform.runLater(() -> poleTytul.requestFocus());
+
+        dialog.setResultConverter(button -> {
+            if (button == przypnijButton) {
+                String tytul = poleTytul.getText().trim();
+                String kategoria = comboKategoria.getValue();
+
+                if (tytul.isEmpty() || kategoria == null) {
+                    utworzAlert(Alert.AlertType.WARNING, "Uzupełnij tytuł i kategorię!");
+                    return null;
                 }
-            });
-        }).start();
+
+                return new OgloszenieDTO(
+                        tytul,
+                        poleTresc.getText().trim(),
+                        poleKontakt.getText().trim(),
+                        kategoria,
+                        Sesja.getZalogowanyUzytkownik().getLogin());
+            }
+            return null;
+        });
+
+        dialog.showAndWait().ifPresent(nowe -> {
+            new Thread(() -> {
+                Zadanie zadanie = new Zadanie(TypZadania.DODAJ_OGLOSZENIE, nowe);
+                Odpowiedz odp = KlientSieciowy.pobierzInstancje().wyslijISprawdz(zadanie);
+                Platform.runLater(() -> {
+                    if (odp != null && odp.getStatus() == StatusOdpowiedzi.OK) {
+                        utworzAlert(Alert.AlertType.INFORMATION, "Ogłoszenie przypięte do tablicy!");
+                        odswiezListe();
+                    } else {
+                        utworzAlert(Alert.AlertType.ERROR,
+                                "Błąd dodawania: " + (odp != null ? odp.getWiadomosc() : "brak odpowiedzi"));
+                    }
+                });
+            }).start();
+        });
     }
 
     @FXML
@@ -290,25 +354,46 @@ public class KontrolerTablicy {
     private void edytujOgloszenie(OgloszenieDTO item) {
         Dialog<OgloszenieDTO> dialog = new Dialog<>();
         dialog.setTitle("Edycja");
-        dialog.setHeaderText("Edytuj ogłoszenie");
+        dialog.setHeaderText("📝 Edytuj ogłoszenie");
         dialog.getDialogPane().getStylesheets().add(getClass().getResource("/style.css").toExternalForm());
         dialog.getDialogPane().getStyleClass().add("witcher-dialog");
+        dialog.getDialogPane().setPrefWidth(500);
 
         ButtonType zapiszButton = new ButtonType("Zapisz", ButtonBar.ButtonData.OK_DONE);
         dialog.getDialogPane().getButtonTypes().addAll(zapiszButton, ButtonType.CANCEL);
 
-        VBox content = new VBox(10);
+        VBox content = new VBox(15);
         content.setPadding(new Insets(20));
-        content.getStyleClass().add("ad-card"); // Wygląd pergaminu
+        content.getStyleClass().add("ad-card");
 
         TextField edTytul = new TextField(item.getTytul());
-        TextArea edTresc = new TextArea(item.getTresc());
-        TextField edKontakt = new TextField(item.getDaneKontaktowe());
-        ComboBox<String> edKategoria = new ComboBox<>(comboKategoria.getItems());
-        edKategoria.setValue(item.getKategoria());
+        edTytul.setPrefHeight(40);
 
-        content.getChildren().addAll(new Label("Tytuł:"), edTytul, new Label("Kategoria:"), edKategoria,
-                new Label("Kontakt:"), edKontakt, new Label("Treść:"), edTresc);
+        TextArea edTresc = new TextArea(item.getTresc());
+        edTresc.setWrapText(true);
+        edTresc.setPrefRowCount(5);
+
+        TextField edKontakt = new TextField(item.getDaneKontaktowe());
+        edKontakt.setPrefHeight(40);
+
+        ComboBox<String> edKategoria = new ComboBox<>();
+        if (listaKategorii != null) {
+            edKategoria.setItems(FXCollections.observableArrayList(listaKategorii));
+        }
+        edKategoria.setValue(item.getKategoria());
+        edKategoria.setMaxWidth(Double.MAX_VALUE);
+        edKategoria.setPrefHeight(40);
+
+        Label lbl1 = new Label("Tytuł:");
+        lbl1.setStyle("-fx-font-weight: bold; -fx-text-fill: #2b1d0e;");
+        Label lbl2 = new Label("Kategoria:");
+        lbl2.setStyle("-fx-font-weight: bold; -fx-text-fill: #2b1d0e;");
+        Label lbl3 = new Label("Kontakt:");
+        lbl3.setStyle("-fx-font-weight: bold; -fx-text-fill: #2b1d0e;");
+        Label lbl4 = new Label("Treść:");
+        lbl4.setStyle("-fx-font-weight: bold; -fx-text-fill: #2b1d0e;");
+
+        content.getChildren().addAll(lbl1, edTytul, lbl2, edKategoria, lbl3, edKontakt, lbl4, edTresc);
         dialog.getDialogPane().setContent(content);
 
         dialog.setResultConverter(b -> {
@@ -329,7 +414,7 @@ public class KontrolerTablicy {
                 Platform.runLater(() -> {
                     if (odp != null && odp.getStatus() == StatusOdpowiedzi.OK) {
                         utworzAlert(Alert.AlertType.INFORMATION, "Zapisano zmiany.");
-                        odswiezListe(); // Odśwież by zobaczyć zmiany
+                        odswiezListe();
                     } else {
                         utworzAlert(Alert.AlertType.ERROR,
                                 "Błąd edycji: " + (odp != null ? odp.getWiadomosc() : "brak odp"));
@@ -342,7 +427,7 @@ public class KontrolerTablicy {
     private void usunOgloszenie(OgloszenieDTO item) {
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
         confirm.setTitle("Potwierdzenie");
-        confirm.setHeaderText("Usunąć " + item.getTytul() + "?");
+        confirm.setHeaderText("Usunąć '" + item.getTytul() + "'?");
         confirm.getDialogPane().getStylesheets().add(getClass().getResource("/style.css").toExternalForm());
         confirm.getDialogPane().getStyleClass().add("witcher-dialog");
 
@@ -367,7 +452,8 @@ public class KontrolerTablicy {
 
     @FXML
     private void generujRaport() {
-        // Implementacja raportu
+        // TODO: Implementacja raportu
+        utworzAlert(Alert.AlertType.INFORMATION, "Funkcja raportów w przygotowaniu...");
     }
 
     private void utworzAlert(Alert.AlertType typ, String tresc) {
@@ -376,6 +462,7 @@ public class KontrolerTablicy {
         alert.setContentText(tresc);
         try {
             alert.getDialogPane().getStylesheets().add(getClass().getResource("/style.css").toExternalForm());
+            alert.getDialogPane().getStyleClass().add("witcher-dialog");
         } catch (Exception e) {
         }
         alert.showAndWait();

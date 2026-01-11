@@ -493,3 +493,97 @@
     font-family: 'Segoe UI Emoji', 'Apple Color Emoji', sans-serif;
     -fx-translate-y: -25;
 }
+
+/* === POZIOME KARTY OGŁOSZEŃ (WERSJA CZYTELNA) === */
+.contract-note-horizontal {
+    -fx-background-image: url("parchment_texture.png");
+    background-image: url("parchment_texture.png");
+    -fx-background-repeat: repeat;
+    background-repeat: repeat;
+    -fx-background-color: #e8dcbc;
+    background-color: #e8dcbc;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.6), 8, 0, 3, 3);
+    -fx-border-color: #c5a557;
+    border-color: #c5a557;
+    -fx-border-width: 2;
+    border-width: 2;
+    -fx-border-radius: 3;
+    border-radius: 3px;
+}
+
+.contract-note-horizontal:hover {
+    -fx-background-color: #f0e4c8;
+    background-color: #f0e4c8;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.8), 12, 0, 4, 4);
+    -fx-border-color: #ffcc00;
+    border-color: #ffcc00;
+}
+
+/* === PRZYCISK DODAWANIA OGŁOSZENIA === */
+.add-button {
+    -fx-background-color: linear-gradient(#8a0b0b, #5c0808);
+    background-color: #8a0b0b;
+    -fx-text-fill: #f5e6c4;
+    -fx-font-family: 'Cinzel', 'Georgia', serif;
+    font-family: 'Cinzel', 'Georgia', serif;
+    -fx-font-weight: bold;
+    font-weight: bold;
+    -fx-font-size: 15px;
+    font-size: 15px;
+    -fx-background-radius: 3;
+    -fx-border-color: #c5a557;
+    border-color: #c5a557;
+    -fx-border-width: 2;
+    border-width: 2;
+    -fx-border-radius: 3;
+    border-radius: 3px;
+    -fx-padding: 10 25;
+    padding: 10 25;
+    -fx-cursor: hand;
+    cursor: pointer;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.6), 5, 0, 0, 2);
+}
+
+.add-button:hover {
+    -fx-background-color: linear-gradient(#a61010, #8a0b0b);
+    background-color: #a61010;
+    -fx-text-fill: #ffcc00;
+    -fx-border-color: #ffcc00;
+    border-color: #ffcc00;
+    -fx-effect: dropshadow(three-pass-box, rgba(255, 200, 0, 0.4), 10, 0, 0, 0);
+}
+
+.add-button:pressed {
+    -fx-background-color: #5c0808;
+    background-color: #5c0808;
+    -fx-effect: innershadow(three-pass-box, rgba(0, 0, 0, 0.6), 5, 0, 0, 0);
+}
+
+/* === DIALOG WIEDŹMIŃSKI === */
+.witcher-dialog {
+    -fx-background-image: url("wood_texture.png");
+    background-image: url("wood_texture.png");
+    -fx-background-repeat: repeat;
+    background-repeat: repeat;
+}
+
+.witcher-dialog .header-panel {
+    -fx-background-color: rgba(62, 43, 31, 0.95);
+    background-color: rgba(62, 43, 31, 0.95);
+    -fx-padding: 20;
+    padding: 20px;
+    -fx-border-color: #c5a557;
+    border-color: #c5a557;
+    -fx-border-width: 0 0 3 0;
+    border-width: 0 0 3 0;
+}
+
+.witcher-dialog .header-panel .label {
+    -fx-font-family: 'Cinzel', 'Georgia', serif;
+    font-family: 'Cinzel', 'Georgia', serif;
+    -fx-font-size: 22px;
+    font-size: 22px;
+    -fx-text-fill: #c5a557;
+    -fx-font-weight: bold;
+    font-weight: bold;
+}

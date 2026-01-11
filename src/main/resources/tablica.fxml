@@ -9,48 +9,14 @@
             prefWidth="1100" prefHeight="750"
             style="-fx-background-color: #1e1e2e;">
             
-    <!-- Panel Boczny (Dodawanie) -->
-    <left>
-        <VBox spacing="15" prefWidth="340" style="-fx-background-color: rgba(43, 29, 14, 0.85); -fx-padding: 25; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 10, 0, 5, 0);">
-            
-            <Label text="✨ Nowe Zlecenie" styleClass="subheader-label"/>
-            <Separator/>
-            
-            <VBox spacing="6">
-                <Label text="Tytuł" style="-fx-font-weight: bold;"/>
-                <TextField fx:id="poleTytul" promptText="Co chcesz ogłosić?" prefHeight="40"/>
-            </VBox>
-            
-            <VBox spacing="6">
-                <Label text="Kategoria" style="-fx-font-weight: bold;"/>
-                <ComboBox fx:id="comboKategoria" promptText="Wybierz kategorię" maxWidth="Infinity" prefHeight="40"/>
-            </VBox>
-            
-            <VBox spacing="6">
-                <Label text="Dane kontaktowe" style="-fx-font-weight: bold;"/>
-                <TextField fx:id="poleDaneKontaktowe" promptText="Tel, email..." prefHeight="40"/>
-            </VBox>
-            
-            <VBox spacing="6" VBox.vgrow="ALWAYS">
-                <Label text="Treść" style="-fx-font-weight: bold;"/>
-                <TextArea fx:id="poleTresc" promptText="Opisz szczegóły..." wrapText="true" VBox.vgrow="ALWAYS"/>
-            </VBox>
-            
-            <Button text="⚔ PRZYPNIJ" onAction="#dodajOgloszenie" maxWidth="Infinity" prefHeight="45"/>
-            
-            <Separator/>
-            
-            <Button text="📜 Spisz Raport" onAction="#generujRaport" maxWidth="Infinity" prefHeight="38" styleClass="secondary-button"/>
-            
-        </VBox>
-    </left>
-    
     <!-- Główny obszar -->
     <center>
         <VBox spacing="15" style="-fx-padding: 25;">
             
             <!-- Nagłówek -->
             <HBox alignment="CENTER_LEFT" spacing="15" style="-fx-padding: 0 0 10 0;">
+                <Button text="✨ Nowe Zlecenie" onAction="#pokazDialogDodawania" styleClass="add-button" prefHeight="40"/>
+                <Region HBox.hgrow="ALWAYS"/>
                 <Label text="Tablica Ogłoszeń" styleClass="header-label"/>
                 <Region HBox.hgrow="ALWAYS"/>
                 <Label fx:id="etykietaRola" style="-fx-text-fill: #c5a557; -fx-font-weight: bold; -fx-font-size: 16px;"/>
@@ -69,12 +35,13 @@
                     <Button text="Odnowa" onAction="#wyczyscFiltr" prefHeight="35" styleClass="secondary-button"/>
                 </FlowPane>
                 <Button text="🔄" onAction="#odswiezListe" prefHeight="35" styleClass="secondary-button"/>
+                <Button text="📜 Raport" onAction="#generujRaport" prefHeight="35" styleClass="secondary-button"/>
             </HBox>
             
-            <!-- Tablica Korkowa (Siatka) -->
-            <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" styleClass="contract-scroll-pane" hbarPolicy="NEVER">
-                <FlowPane fx:id="kontenerOgloszen" hgap="30" vgap="30" prefWrapLength="800"
-                          style="-fx-padding: 30; -fx-alignment: top-left;" />
+            <!-- Tablica Korkowa z pergaminami (pionowy scroll) -->
+            <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" styleClass="contract-scroll-pane" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
+                <FlowPane fx:id="kontenerOgloszen" hgap="25" vgap="25" prefWrapLength="1200"
+                          style="-fx-padding: 25; -fx-alignment: top-center;" />
             </ScrollPane>
             
         </VBox>
