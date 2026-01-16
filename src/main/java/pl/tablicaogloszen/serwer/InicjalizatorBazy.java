@@ -94,8 +94,9 @@ public class InicjalizatorBazy {
                 }
             }
 
-            // 6. Dodaj kategorie
-            String[] kategorie = { "Motoryzacja", "Elektronika", "Nieruchomości", "Praca", "Usługi", "Inne" };
+            // 6. Dodaj kategorie (Wiedźmin Style)
+            String[] kategorie = { "Kontrakty na potwory", "Handel i wymiana", "Poszukiwani", "Usługi i rzemiosło",
+                    "Sprawy wioskowe", "Zaginięcia", "Ogłoszenia królewskie", "Inne zlecenia" };
             for (String kat : kategorie) {
                 try (PreparedStatement pst = pol.prepareStatement("INSERT IGNORE INTO kategorie (nazwa) VALUES (?)")) {
                     pst.setString(1, kat);
@@ -107,26 +108,31 @@ public class InicjalizatorBazy {
             try (Statement st = pol.createStatement();
                     ResultSet rs = st.executeQuery("SELECT COUNT(*) FROM ogloszenia")) {
                 if (rs.next() && rs.getInt(1) == 0) {
-                    System.out.println("   + Dodawanie przykładowych ogłoszeń...");
+                    System.out.println("   + Dodawanie przykładowych ogłoszeń (Wiedźmin)...");
 
-                    String sqlInsert = "INSERT INTO ogloszenia (tytul, tresc, dane_kontaktowe, id_kategorii, id_autora, data_dodania) "
-                            +
-                            "VALUES (?, ?, ?, (SELECT id FROM kategorie WHERE nazwa=? LIMIT 1), (SELECT id FROM uzytkownicy WHERE login=? LIMIT 1), NOW())";
+                    String sqlInsert = "INSERT INTO ogloszenia (tytul, tresc, dane_kontaktowe, id_kategorii, id_autora, data_dodania, wyswietlenia, zgloszenia) "
+                            + "VALUES (?, ?, ?, (SELECT id FROM kategorie WHERE nazwa=? LIMIT 1), (SELECT id FROM uzytkownicy WHERE login=? LIMIT 1), NOW(), ?, ?)";
 
                     try (PreparedStatement pst = pol.prepareStatement(sqlInsert)) {
-                        pst.setString(1, "Sprzedam Opla");
+                        // 1. Gryf
+                        pst.setString(1, "Kontrakt: Gryf z Białego Sadu");
                         pst.setString(2,
-                                "Sprzedam Opla Corsa, rocznik 2010. Stan 'igła', Niemiec płakał jak sprzedawał.");
-                        pst.setString(3, "500-100-200");
-                        pst.setString(4, "Motoryzacja");
+                                "Bestia o skrzydłach orła i ciele lwa zaatakowała nasz targ. Nagroda: 300 koron.");
+                        pst.setString(3, "Sołtys Białego Sadu");
+                        pst.setString(4, "Kontrakty na potwory");
                         pst.setString(5, "admin");
+                        pst.setInt(6, 45); // wyświetlenia
+                        pst.setInt(7, 0); // zgłoszenia
                         pst.executeUpdate();
 
-                        pst.setString(1, "Laptop Gamingowy");
-                        pst.setString(2, "Sprzedam wydajnego laptopa do gier, 16GB RAM, RTX 3060.");
-                        pst.setString(3, "laptop@example.com");
-                        pst.setString(4, "Elektronika");
+                        // 2. Miecz
+                        pst.setString(1, "Sprzedam miecz srebrny");
+                        pst.setString(2, "Wykuty w Kaer Morhen, idealny na Utopce. Lekko używany.");
+                        pst.setString(3, "Karczma w Wyzimie");
+                        pst.setString(4, "Handel i wymiana");
                         pst.setString(5, "admin");
+                        pst.setInt(6, 12);
+                        pst.setInt(7, 0);
                         pst.executeUpdate();
                     }
                 }
