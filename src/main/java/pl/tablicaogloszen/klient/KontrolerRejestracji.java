@@ -10,7 +10,7 @@ import java.io.IOException;
  * Kontroler widoku rejestracji.
  * Obsługuje formularz rejestracji nowego użytkownika z walidacją.
  * 
- * @author System
+ * @author Dawid Sułek, Dominik Rodziewicz
  * @version 1.0
  */
 public class KontrolerRejestracji {

@@ -6,7 +6,7 @@ import java.io.Serializable;
  * Obiekt żądania przesyłany od klienta do serwera.
  * Enkapsuluje typ operacji i dane potrzebne do jej wykonania.
  * 
- * @author System
+ * @author Dawid Sułek, Dominik Rodziewicz
  * @version 1.0
  */
 public class Zadanie implements Serializable {

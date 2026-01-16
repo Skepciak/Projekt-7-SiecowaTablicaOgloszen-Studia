@@ -6,7 +6,7 @@ import pl.tablicaogloszen.wspolne.UzytkownikDTO;
  * Klasa przechowująca stan sesji użytkownika.
  * Singleton-like static holder dla danych zalogowanego użytkownika.
  * 
- * @author System
+ * @author Dawid Sułek, Dominik Rodziewicz
  * @version 1.0
  */
 public class Sesja {

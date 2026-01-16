@@ -13,9 +13,12 @@ import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Region;
 import pl.tablicaogloszen.wspolne.*;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Random;
+import javafx.stage.FileChooser;
 
 public class KontrolerTablicy {
 
@@ -32,6 +35,8 @@ public class KontrolerTablicy {
     private ComboBox<String> filtrSortowanie;
     @FXML
     private Label etykietaRola;
+    @FXML
+    private Button przyciskZgloszone;
 
     private final Random random = new Random();
 
@@ -41,13 +46,19 @@ public class KontrolerTablicy {
     public void initialize() {
         pobierzKategorie();
         filtrSortowanie.setItems(FXCollections.observableArrayList(
-                "Najnowsze", "Najstarsze", "Tytuł A-Z", "Tytuł Z-A"));
+                "Najnowsze", "Najstarsze", "Tytuł A-Z", "Tytuł Z-A", "Najpopularniejsze"));
         filtrSortowanie.setValue("Najnowsze");
 
         UzytkownikDTO uzytkownik = Sesja.getZalogowanyUzytkownik();
         if (uzytkownik != null) {
             boolean czyAdmin = "ADMIN".equals(uzytkownik.getRola());
             etykietaRola.setText(czyAdmin ? "👑 ADMIN" : "👤 " + uzytkownik.getLogin());
+            // Przycisk zgłoszonych widoczny TYLKO dla admina
+            przyciskZgloszone.setVisible(czyAdmin);
+            przyciskZgloszone.setManaged(czyAdmin);
+        } else {
+            przyciskZgloszone.setVisible(false);
+            przyciskZgloszone.setManaged(false);
         }
 
         KlientSieciowy.pobierzInstancje().ustawKontrolerTablicy(this);
@@ -91,6 +102,12 @@ public class KontrolerTablicy {
         dateLabel.getStyleClass().add("ad-meta");
 
         metaBox.getChildren().addAll(catLabel, dateLabel);
+
+        // Licznik popularności (wyświetleń)
+        Label viewsLabel = new Label("👁 " + item.getWyswietlenia());
+        viewsLabel.getStyleClass().add("ad-meta");
+        viewsLabel.setTooltip(new Tooltip("Liczba wyświetleń"));
+        metaBox.getChildren().add(viewsLabel);
 
         // Treść
         Label contentLabel = new Label(item.getTresc());
@@ -141,7 +158,23 @@ public class KontrolerTablicy {
 
                 footer.getChildren().addAll(btnEdytuj, btnUsun);
             }
+
+            // Przycisk zgłaszania (dla zalogowanych, którzy nie są właścicielami)
+            if (!czyWlasciciel && !czyAdmin) {
+                Button btnZglos = new Button("🚩");
+                btnZglos.getStyleClass().addAll("action-icon-button");
+                btnZglos.setTooltip(new Tooltip("Zgłoś nieodpowiednie ogłoszenie"));
+                btnZglos.setOnAction(e -> zglosOgloszenie(item));
+                footer.getChildren().add(btnZglos);
+            }
         }
+
+        // Kliknięcie na kartę otwiera szczegóły
+        card.setOnMouseClicked(e -> {
+            if (e.getClickCount() == 1) {
+                pokazSzczegoly(item);
+            }
+        });
 
         // Składanie całości
         card.getChildren().addAll(pin, titleLabel, metaBox, contentLabel, kontaktBox, separator, footer);
@@ -195,6 +228,9 @@ public class KontrolerTablicy {
                     break;
                 case "Tytuł Z-A":
                     sortowanie = "TYTUL_DESC";
+                    break;
+                case "Najpopularniejsze":
+                    sortowanie = "POPULARNOSC_DESC";
                     break;
                 default:
                     sortowanie = "DATA_DESC";
@@ -452,8 +488,263 @@ public class KontrolerTablicy {
 
     @FXML
     private void generujRaport() {
-        // TODO: Implementacja raportu
-        utworzAlert(Alert.AlertType.INFORMATION, "Funkcja raportów w przygotowaniu...");
+        UzytkownikDTO zalogowany = Sesja.getZalogowanyUzytkownik();
+        if (zalogowany == null || !"ADMIN".equals(zalogowany.getRola())) {
+            utworzAlert(Alert.AlertType.WARNING, "Tylko administrator może generować raporty.");
+            return;
+        }
+
+        new Thread(() -> {
+            Zadanie zadanie = new Zadanie(TypZadania.GENERUJ_RAPORT, null);
+            Odpowiedz odp = KlientSieciowy.pobierzInstancje().wyslijISprawdz(zadanie);
+
+            Platform.runLater(() -> {
+                if (odp != null && odp.getStatus() == StatusOdpowiedzi.OK) {
+                    String raport = (String) odp.getDane();
+
+                    FileChooser fileChooser = new FileChooser();
+                    fileChooser.setTitle("Zapisz raport");
+                    fileChooser.setInitialFileName("raport_ogloszenia.txt");
+                    fileChooser.getExtensionFilters().add(
+                            new FileChooser.ExtensionFilter("Pliki tekstowe", "*.txt"));
+
+                    java.io.File file = fileChooser.showSaveDialog(kontenerOgloszen.getScene().getWindow());
+                    if (file != null) {
+                        try (FileWriter writer = new FileWriter(file)) {
+                            writer.write(raport);
+                            utworzAlert(Alert.AlertType.INFORMATION, "Raport zapisany: " + file.getName());
+                        } catch (IOException e) {
+                            utworzAlert(Alert.AlertType.ERROR, "Błąd zapisu: " + e.getMessage());
+                        }
+                    }
+                } else {
+                    utworzAlert(Alert.AlertType.ERROR, "Błąd generowania raportu: " +
+                            (odp != null ? odp.getWiadomosc() : "brak odpowiedzi"));
+                }
+            });
+        }).start();
+    }
+
+    /**
+     * Wyświetla dialog ze zgłoszonymi ogłoszeniami (tylko dla admina)
+     */
+    @FXML
+    private void pokazZgloszone() {
+        new Thread(() -> {
+            Zadanie zadanie = new Zadanie(TypZadania.POBIERZ_ZGLOSZONE, null);
+            Odpowiedz odp = KlientSieciowy.pobierzInstancje().wyslijISprawdz(zadanie);
+
+            Platform.runLater(() -> {
+                if (odp != null && odp.getStatus() == StatusOdpowiedzi.OK) {
+                    @SuppressWarnings("unchecked")
+                    List<OgloszenieDTO> zgloszone = (List<OgloszenieDTO>) odp.getDane();
+
+                    if (zgloszone.isEmpty()) {
+                        utworzAlert(Alert.AlertType.INFORMATION, "Brak zgłoszonych ogłoszeń.");
+                        return;
+                    }
+
+                    // Tworzenie dialogu
+                    Dialog<Void> dialog = new Dialog<>();
+                    dialog.setTitle("Zgłoszone Zlecenia");
+                    dialog.setHeaderText("🚩 Ogłoszenia z co najmniej jednym zgłoszeniem");
+
+                    try {
+                        dialog.getDialogPane().getStylesheets()
+                                .add(getClass().getResource("/style.css").toExternalForm());
+                        dialog.getDialogPane().getStyleClass().add("witcher-dialog");
+                    } catch (Exception e) {
+                    }
+
+                    dialog.getDialogPane().setPrefWidth(600);
+                    dialog.getDialogPane().setPrefHeight(500);
+                    dialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
+
+                    VBox listaBox = new VBox(10);
+                    listaBox.setPadding(new Insets(10));
+
+                    for (OgloszenieDTO ogl : zgloszone) {
+                        HBox wiersz = new HBox(10);
+                        wiersz.setAlignment(Pos.CENTER_LEFT);
+                        wiersz.setStyle(
+                                "-fx-padding: 10; -fx-background-color: rgba(100, 50, 50, 0.3); -fx-background-radius: 8;");
+
+                        VBox info = new VBox(3);
+                        info.setAlignment(Pos.CENTER_LEFT);
+                        HBox.setHgrow(info, Priority.ALWAYS);
+
+                        Label tytulLbl = new Label(ogl.getTytul());
+                        tytulLbl.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
+
+                        Label zgloszeniaLbl = new Label(
+                                "🚩 Zgłoszenia: " + ogl.getZgloszenia() + " | Autor: " + ogl.getAutor());
+                        zgloszeniaLbl.setStyle("-fx-font-size: 11px;");
+
+                        info.getChildren().addAll(tytulLbl, zgloszeniaLbl);
+
+                        Button btnUsun = new Button("🗑 Usuń");
+                        btnUsun.getStyleClass().add("delete-button");
+                        btnUsun.setOnAction(e -> {
+                            // Potwierdzenie usunięcia
+                            Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+                            confirm.setTitle("Potwierdzenie");
+                            confirm.setHeaderText("Usunąć zgłoszone ogłoszenie?");
+                            confirm.setContentText("'" + ogl.getTytul() + "' zostanie trwale usunięte.");
+
+                            confirm.showAndWait().ifPresent(btn -> {
+                                if (btn == ButtonType.OK) {
+                                    new Thread(() -> {
+                                        Odpowiedz delOdp = KlientSieciowy.pobierzInstancje()
+                                                .wyslijISprawdz(new Zadanie(TypZadania.USUN_OGLOSZENIE, ogl.getId()));
+                                        Platform.runLater(() -> {
+                                            if (delOdp != null && delOdp.getStatus() == StatusOdpowiedzi.OK) {
+                                                utworzAlert(Alert.AlertType.INFORMATION, "Usunięto.");
+                                                dialog.close();
+                                                odswiezListe();
+                                                // Otwórz ponownie dialog zgłoszonych
+                                                pokazZgloszone();
+                                            } else {
+                                                utworzAlert(Alert.AlertType.ERROR, "Błąd usuwania.");
+                                            }
+                                        });
+                                    }).start();
+                                }
+                            });
+                        });
+
+                        wiersz.getChildren().addAll(info, btnUsun);
+                        listaBox.getChildren().add(wiersz);
+                    }
+
+                    ScrollPane scroll = new ScrollPane(listaBox);
+                    scroll.setFitToWidth(true);
+                    scroll.setStyle("-fx-background: transparent; -fx-background-color: transparent;");
+
+                    dialog.getDialogPane().setContent(scroll);
+                    dialog.showAndWait();
+
+                } else {
+                    utworzAlert(Alert.AlertType.ERROR, "Błąd pobierania zgłoszonych: " +
+                            (odp != null ? odp.getWiadomosc() : "brak odpowiedzi"));
+                }
+            });
+        }).start();
+    }
+
+    /**
+     * Zgłasza ogłoszenie jako nieodpowiednie
+     */
+    private void zglosOgloszenie(OgloszenieDTO item) {
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle("Zgłoszenie");
+        confirm.setHeaderText("Czy na pewno chcesz zgłosić '" + item.getTytul() + "' jako nieodpowiednie?");
+        confirm.setContentText("Zgłoszenie zostanie przekazane do administratora.");
+
+        try {
+            confirm.getDialogPane().getStylesheets().add(getClass().getResource("/style.css").toExternalForm());
+            confirm.getDialogPane().getStyleClass().add("witcher-dialog");
+        } catch (Exception e) {
+        }
+
+        confirm.showAndWait().ifPresent(btn -> {
+            if (btn == ButtonType.OK) {
+                new Thread(() -> {
+                    Zadanie zadanie = new Zadanie(TypZadania.ZGLOS_OGLOSZENIE, item.getId());
+                    Odpowiedz odp = KlientSieciowy.pobierzInstancje().wyslijISprawdz(zadanie);
+                    Platform.runLater(() -> {
+                        if (odp != null && odp.getStatus() == StatusOdpowiedzi.OK) {
+                            utworzAlert(Alert.AlertType.INFORMATION, "Ogłoszenie zostało zgłoszone. Dziękujemy!");
+                        } else {
+                            utworzAlert(Alert.AlertType.ERROR, "Błąd zgłaszania: " +
+                                    (odp != null ? odp.getWiadomosc() : "brak odpowiedzi"));
+                        }
+                    });
+                }).start();
+            }
+        });
+    }
+
+    /**
+     * Wyświetla szczegóły ogłoszenia w dialogu (zwiększa licznik wyświetleń)
+     */
+    private void pokazSzczegoly(OgloszenieDTO item) {
+        // Zwiększ licznik wyświetleń na serwerze
+        new Thread(() -> {
+            Zadanie zadanie = new Zadanie(TypZadania.POBIERZ_SZCZEGOLY, item.getId());
+            KlientSieciowy.pobierzInstancje().wyslijISprawdz(zadanie);
+        }).start();
+
+        // Pokaż dialog ze szczegółami
+        Dialog<Void> dialog = new Dialog<>();
+        dialog.setTitle("Szczegóły ogłoszenia");
+        dialog.setHeaderText(item.getTytul());
+
+        try {
+            dialog.getDialogPane().getStylesheets().add(getClass().getResource("/style.css").toExternalForm());
+            dialog.getDialogPane().getStyleClass().add("witcher-dialog");
+        } catch (Exception e) {
+        }
+
+        dialog.getDialogPane().setPrefWidth(500);
+        dialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
+
+        VBox content = new VBox(15);
+        content.setPadding(new Insets(20));
+        content.getStyleClass().add("ad-card");
+
+        // Kategoria
+        HBox kategoriaBox = new HBox(10);
+        Label lblKat = new Label("Kategoria:");
+        lblKat.setStyle("-fx-font-weight: bold;");
+        Label valKat = new Label(item.getKategoria());
+        kategoriaBox.getChildren().addAll(lblKat, valKat);
+
+        // Autor
+        HBox autorBox = new HBox(10);
+        Label lblAutor = new Label("Autor:");
+        lblAutor.setStyle("-fx-font-weight: bold;");
+        Label valAutor = new Label(item.getAutor());
+        autorBox.getChildren().addAll(lblAutor, valAutor);
+
+        // Data
+        HBox dataBox = new HBox(10);
+        Label lblData = new Label("Data:");
+        lblData.setStyle("-fx-font-weight: bold;");
+        String dataStr = item.getDataDodania() != null
+                ? item.getDataDodania().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"))
+                : "Nieznana";
+        Label valData = new Label(dataStr);
+        dataBox.getChildren().addAll(lblData, valData);
+
+        // Statystyki
+        HBox statsBox = new HBox(20);
+        Label viewsLbl = new Label("👁 Wyświetlenia: " + item.getWyswietlenia());
+        Label reportsLbl = new Label("🚩 Zgłoszenia: " + item.getZgloszenia());
+        statsBox.getChildren().addAll(viewsLbl, reportsLbl);
+
+        // Treść
+        VBox trescBox = new VBox(5);
+        Label lblTresc = new Label("Treść:");
+        lblTresc.setStyle("-fx-font-weight: bold;");
+        TextArea trescArea = new TextArea(item.getTresc());
+        trescArea.setWrapText(true);
+        trescArea.setEditable(false);
+        trescArea.setPrefRowCount(5);
+        trescBox.getChildren().addAll(lblTresc, trescArea);
+
+        // Kontakt
+        if (item.getDaneKontaktowe() != null && !item.getDaneKontaktowe().isEmpty()) {
+            HBox kontaktBox = new HBox(10);
+            Label lblKontakt = new Label("📞 Kontakt:");
+            lblKontakt.setStyle("-fx-font-weight: bold;");
+            Label valKontakt = new Label(item.getDaneKontaktowe());
+            kontaktBox.getChildren().addAll(lblKontakt, valKontakt);
+            content.getChildren().add(kontaktBox);
+        }
+
+        content.getChildren().addAll(kategoriaBox, autorBox, dataBox, statsBox, trescBox);
+        dialog.getDialogPane().setContent(content);
+        dialog.showAndWait();
     }
 
     private void utworzAlert(Alert.AlertType typ, String tresc) {

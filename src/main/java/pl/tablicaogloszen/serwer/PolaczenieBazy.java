@@ -5,20 +5,15 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 /**
- * Singleton zarządzający połączeniem z bazą danych MySQL.
- * <p>
- * Domyślna konfiguracja dla środowiska Laragon:
- * <ul>
- * <li>Host: localhost</li>
- * <li>Port: 3306</li>
- * <li>Baza: sieciowa_tablica</li>
- * <li>Użytkownik: root</li>
- * <li>Hasło: (puste)</li>
- * </ul>
- * </p>
+ * Połączenie z bazą MySQL - używam wzorca Singleton.
  * 
- * @author System
- * @version 1.0
+ * Dzięki Singletonowi mamy jedno połączenie do bazy w całej aplikacji
+ * zamiast otwierać nowe przy każdym zapytaniu (co byłoby wolne).
+ * 
+ * Domyślna konfiguracja dla Laragon:
+ * - localhost:3306, baza: sieciowa_tablica, user: root, hasło: puste
+ * 
+ * @author Dawid Sułek, Dominik Rodziewicz
  */
 public class PolaczenieBazy {
     /** URL połączenia JDBC */

@@ -9,6 +9,7 @@ skinparam class {
 }
 
 title Diagram Klas - Sieciowa Tablica Ogłoszeń
+footer Autorzy: Dawid Sułek, Dominik Rodziewicz
 
 package "pl.tablicaogloszen.wspolne" #181825 {
     class OgloszenieDTO <<Serializable>> {
@@ -20,6 +21,8 @@ package "pl.tablicaogloszen.wspolne" #181825 {
         - int idAutora
         - String autor
         - LocalDateTime dataDodania
+        - int wyswietlenia
+        - int zgloszenia
         + gettery()
         + settery()
     }
@@ -62,6 +65,11 @@ package "pl.tablicaogloszen.wspolne" #181825 {
         EDYTUJ_OGLOSZENIE
         USUN_OGLOSZENIE
         POBIERZ_KATEGORIE
+        ODSWIEZ
+        ZGLOS_OGLOSZENIE
+        POBIERZ_SZCZEGOLY
+        POBIERZ_ZGLOSZONE
+        GENERUJ_RAPORT
     }
     
     enum StatusOdpowiedzi {
@@ -97,6 +105,14 @@ package "pl.tablicaogloszen.serwer" #181825 {
         + {static} pobierzPolaczenie(): Connection
     }
     
+    class Bezpieczenstwo {
+        + {static} hashuj(haslo): String
+    }
+    
+    class InicjalizatorBazy {
+        + {static} inicjalizuj()
+    }
+    
     class OgloszenieDAO {
         + dodajOgloszenie(ogl, idAutora): boolean
         + edytujOgloszenie(ogl, idUzyt, czyAdmin): boolean
@@ -104,6 +120,10 @@ package "pl.tablicaogloszen.serwer" #181825 {
         + pobierzZFiltrem(filtr): List<OgloszenieDTO>
         + pobierzWszystkie(): List<OgloszenieDTO>
         + pobierzKategorie(): List<String>
+        + zwiekszWyswietlenia(idOgl): void
+        + zglosOgloszenie(idOgl): void
+        + pobierzZgloszone(): List<OgloszenieDTO>
+        + generujRaport(): String
     }
     
     class UzytkownikDAO {
@@ -147,7 +167,7 @@ package "pl.tablicaogloszen.klient" #181825 {
     }
     
     class KontrolerTablicy <<FXML Controller>> {
-        - ListView listaOgloszen
+        - FlowPane kontenerOgloszen
         - ComboBox filtrKategoria
         - ComboBox filtrSortowanie
         + initialize()
@@ -156,6 +176,9 @@ package "pl.tablicaogloszen.klient" #181825 {
         - dodajOgloszenie()
         - edytujOgloszenie(ogl)
         - usunOgloszenie(ogl)
+        - zglosOgloszenie(ogl)
+        - pokazSzczegoly(ogl)
+        - pobierzZgloszone()
         - generujRaport()
     }
     
@@ -163,6 +186,7 @@ package "pl.tablicaogloszen.klient" #181825 {
         - {static} UzytkownikDTO zalogowanyUzytkownik
         + {static} getZalogowanyUzytkownik()
         + {static} setZalogowanyUzytkownik(u)
+        + {static} czyAdmin(): boolean
     }
 }
 
@@ -172,6 +196,7 @@ ObslugaKlienta ..> OgloszenieDAO : używa
 ObslugaKlienta ..> UzytkownikDAO : używa
 OgloszenieDAO ..> PolaczenieBazy : pobiera Connection
 UzytkownikDAO ..> PolaczenieBazy : pobiera Connection
+UzytkownikDAO ..> Bezpieczenstwo : hashuje hasła
 
 AplikacjaKlienta ..> KontrolerLogowania : ładuje FXML
 AplikacjaKlienta ..> KontrolerRejestracji : ładuje FXML
@@ -205,52 +230,69 @@ skinparam actor {
 }
 
 title Diagram Przypadków Użycia - Sieciowa Tablica Ogłoszeń
+footer Autorzy: Dawid Sułek, Dominik Rodziewicz
 
 actor "Użytkownik\n(niezalogowany)" as Guest
 actor "Użytkownik\n(zalogowany)" as User
 actor "Administrator" as Admin
-actor "Serwer" as Server
 
 rectangle "System Tablicy Ogłoszeń" {
+    ' Podstawowe
     usecase "Rejestracja" as UC_REG
     usecase "Logowanie" as UC_LOG
     usecase "Przeglądanie ogłoszeń" as UC_VIEW
     usecase "Filtrowanie ogłoszeń" as UC_FILTER
     usecase "Sortowanie ogłoszeń" as UC_SORT
+    
+    ' Zalogowany użytkownik
     usecase "Dodawanie ogłoszenia" as UC_ADD
     usecase "Edycja własnego ogłoszenia" as UC_EDIT
     usecase "Usuwanie własnego ogłoszenia" as UC_DEL
+    usecase "Wyświetlanie szczegółów" as UC_DETAILS
+    usecase "Zgłaszanie ogłoszenia" as UC_REPORT_AD
+    
+    ' Administrator
     usecase "Usuwanie dowolnego ogłoszenia" as UC_ADMIN_DEL
+    usecase "Przeglądanie zgłoszonych" as UC_VIEW_REPORTED
     usecase "Generowanie raportu" as UC_REPORT
+    
+    ' System
     usecase "Odbieranie powiadomień real-time" as UC_PUSH
 }
 
+' Niezalogowany
 Guest --> UC_REG
 Guest --> UC_LOG
 Guest --> UC_VIEW
 
-User --> UC_VIEW
+' Dziedziczenie
+User --|> Guest
+
+' Zalogowany użytkownik
 User --> UC_FILTER
 User --> UC_SORT
 User --> UC_ADD
 User --> UC_EDIT
 User --> UC_DEL
-User --> UC_REPORT
+User --> UC_DETAILS
+User --> UC_REPORT_AD
 User --> UC_PUSH
 
-Admin --> UC_VIEW
-Admin --> UC_FILTER
-Admin --> UC_ADD
-Admin --> UC_EDIT
+' Administrator dziedziczy po użytkowniku
+Admin --|> User
+
+' Funkcje tylko dla admina
 Admin --> UC_ADMIN_DEL
+Admin --> UC_VIEW_REPORTED
 Admin --> UC_REPORT
 
-Server --> UC_PUSH : wysyła powiadomienia
-
+' Relacje include/extend
 UC_FILTER ..> UC_VIEW : <<extend>>
 UC_SORT ..> UC_VIEW : <<extend>>
 UC_ADD ..> UC_LOG : <<include>>
 UC_EDIT ..> UC_LOG : <<include>>
 UC_DEL ..> UC_LOG : <<include>>
+UC_DETAILS ..> UC_VIEW : <<extend>>
+UC_REPORT_AD ..> UC_DETAILS : <<extend>>
 
 @enduml

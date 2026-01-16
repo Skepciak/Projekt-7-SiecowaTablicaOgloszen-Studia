@@ -1,0 +1,387 @@
+\documentclass{szablon}
+
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{hyperref}
+
+% Konfiguracja listingów kodu Java
+\lstset{
+    language=Java,
+    basicstyle=\ttfamily\footnotesize,
+    keywordstyle=\color{blue}\bfseries,
+    stringstyle=\color{red},
+    commentstyle=\color{gray}\itshape,
+    breaklines=true,
+    frame=single,
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    tabsize=4,
+    showstringspaces=false
+}
+
+\title{Techniki programowania III \\PROJEKT}
+\author{Dawid Sułek, Dominik Rodziewicz \\ Uniwersytet Zielonogórski}
+
+\begin{document}
+
+\chapter{Sieciowa Tablica Ogłoszeń}
+
+\section{Wstęp}
+Projekt „Sieciowa Tablica Ogłoszeń" to aplikacja klient-serwer napisana w języku Java z wykorzystaniem JavaFX do interfejsu graficznego oraz JDBC do komunikacji z bazą danych MySQL. System umożliwia użytkownikom przeglądanie, dodawanie, edytowanie i usuwanie ogłoszeń w czasie rzeczywistym, z pełnym wsparciem dla wielu jednoczesnych połączeń klientów.
+
+Główne cele projektu:
+\begin{itemize}
+    \item Implementacja architektury klient-serwer z komunikacją przez sockety
+    \item Obsługa wielu klientów jednocześnie (wielowątkowość)
+    \item Przechowywanie danych w relacyjnej bazie MySQL
+    \item Nowoczesny interfejs graficzny w JavaFX z motywem „pergaminowym"
+    \item System autoryzacji z rozróżnieniem ról (użytkownik/administrator)
+    \item Powiadomienia w czasie rzeczywistym dla wszystkich podłączonych klientów
+\end{itemize}
+
+\subsection{Opis projektu}
+Aplikacja realizuje następujące funkcjonalności:
+
+\textbf{Dla wszystkich użytkowników:}
+\begin{enumerate}
+    \item Rejestracja nowego konta z walidacją danych
+    \item Logowanie z hashowaniem hasła SHA-256
+    \item Przeglądanie tablicy ogłoszeń
+    \item Filtrowanie ogłoszeń według kategorii, autora i tekstu
+    \item Sortowanie ogłoszeń (data, tytuł, popularność)
+    \item Wyświetlanie szczegółów ogłoszenia (zwiększa licznik wyświetleń)
+\end{enumerate}
+
+\textbf{Dla zalogowanych użytkowników:}
+\begin{enumerate}
+    \item Dodawanie nowych ogłoszeń z kategoriami
+    \item Edycja własnych ogłoszeń
+    \item Usuwanie własnych ogłoszeń
+    \item Zgłaszanie nieodpowiednich ogłoszeń
+    \item Odbieranie powiadomień o zmianach w czasie rzeczywistym
+\end{enumerate}
+
+\textbf{Dla administratorów:}
+\begin{enumerate}
+    \item Usuwanie dowolnych ogłoszeń
+    \item Przeglądanie zgłoszonych ogłoszeń
+    \item Generowanie raportów z tablicy ogłoszeń
+\end{enumerate}
+
+\subsection{Dokumentacja UML}
+
+\textbf{Diagram klas} przedstawia strukturę pakietów aplikacji:
+
+\begin{itemize}
+    \item \texttt{pl.tablicaogloszen.wspolne} -- klasy DTO (Data Transfer Objects) współdzielone między klientem a serwerem
+    \item \texttt{pl.tablicaogloszen.serwer} -- logika serwera, DAO, zarządzanie połączeniami
+    \item \texttt{pl.tablicaogloszen.klient} -- aplikacja klienta JavaFX, kontrolery FXML
+\end{itemize}
+
+Główne klasy modelu:
+\begin{itemize}
+    \item \texttt{OgloszenieDTO} -- reprezentacja ogłoszenia (id, tytuł, treść, kategoria, autor, data, wyświetlenia, zgłoszenia)
+    \item \texttt{UzytkownikDTO} -- reprezentacja użytkownika (id, login, rola)
+    \item \texttt{FiltrDTO} -- parametry filtrowania i sortowania
+    \item \texttt{Zadanie} -- żądanie klienta (typ + dane)
+    \item \texttt{Odpowiedz} -- odpowiedź serwera (status + dane + wiadomość)
+\end{itemize}
+
+\textbf{Diagram przypadków użycia} pokazuje interakcje aktorów z systemem:
+\begin{itemize}
+    \item \textbf{Użytkownik niezalogowany}: rejestracja, logowanie, przeglądanie ogłoszeń
+    \item \textbf{Użytkownik zalogowany}: wszystkie powyższe + dodawanie, edycja, usuwanie własnych, zgłaszanie
+    \item \textbf{Administrator}: wszystkie powyższe + usuwanie dowolnych, przeglądanie zgłoszonych, raporty
+\end{itemize}
+
+\textit{Pełna dokumentacja UML znajduje się w pliku \texttt{dokumentacja.puml} w formacie PlantUML.}
+
+\subsection{Struktura projektu}
+
+\textbf{Hierarchia pakietów:}
+\begin{verbatim}
+src/main/java/pl/tablicaogloszen/
+├── wspolne/          # Klasy współdzielone (DTO, enum)
+│   ├── OgloszenieDTO.java
+│   ├── UzytkownikDTO.java
+│   ├── FiltrDTO.java
+│   ├── Zadanie.java
+│   ├── Odpowiedz.java
+│   ├── TypZadania.java
+│   └── StatusOdpowiedzi.java
+├── serwer/           # Logika serwera
+│   ├── Serwer.java
+│   ├── ObslugaKlienta.java
+│   ├── PolaczenieBazy.java (Singleton)
+│   ├── InicjalizatorBazy.java
+│   ├── OgloszenieDAO.java
+│   ├── UzytkownikDAO.java
+│   └── Bezpieczenstwo.java
+└── klient/           # Aplikacja klienta
+    ├── AplikacjaKlienta.java
+    ├── KlientSieciowy.java (Singleton)
+    ├── KontrolerLogowania.java
+    ├── KontrolerRejestracji.java
+    ├── KontrolerTablicy.java
+    └── Sesja.java
+\end{verbatim}
+
+\textbf{Wzorce projektowe:}
+\begin{itemize}
+    \item \textbf{Singleton} -- \texttt{PolaczenieBazy}, \texttt{KlientSieciowy}
+    \item \textbf{DAO (Data Access Object)} -- \texttt{OgloszenieDAO}, \texttt{UzytkownikDAO}
+    \item \textbf{DTO (Data Transfer Object)} -- wszystkie klasy w pakiecie \texttt{wspolne}
+    \item \textbf{MVC} -- kontrolery FXML + widoki FXML + modele DTO
+\end{itemize}
+
+\textbf{Implementacja interfejsu Serializable:}
+Wszystkie klasy DTO implementują \texttt{java.io.Serializable}, co umożliwia przesyłanie obiektów przez strumienie obiektowe (\texttt{ObjectOutputStream}/\texttt{ObjectInputStream}).
+
+\textbf{Wielowątkowość:}
+\begin{itemize}
+    \item Serwer używa \texttt{ExecutorService} z \texttt{newCachedThreadPool()} do obsługi wielu klientów
+    \item Każdy klient jest obsługiwany w osobnym wątku (\texttt{ObslugaKlienta implements Runnable})
+    \item Klient JavaFX używa \texttt{Platform.runLater()} do aktualizacji UI z wątków roboczych
+\end{itemize}
+
+\subsection{Interfejs użytkownika}
+
+Interfejs graficzny został zbudowany w JavaFX z wykorzystaniem FXML i arkuszy stylów CSS. Zastosowano motyw „pergaminowy" nawiązujący do stylu fantasy.
+
+\textbf{Główne ekrany:}
+\begin{enumerate}
+    \item \textbf{Ekran logowania} (\texttt{logowanie.fxml}) -- pola login/hasło, przyciski „Zaloguj" i „Rejestracja"
+    \item \textbf{Ekran rejestracji} (\texttt{rejestracja.fxml}) -- pola login/hasło/powtórz hasło z walidacją
+    \item \textbf{Tablica ogłoszeń} (\texttt{tablica.fxml}) -- główny widok z kartami ogłoszeń
+\end{enumerate}
+
+\textbf{Elementy ergonomii:}
+\begin{itemize}
+    \item Filtry umieszczone w górnym pasku (kategoria, autor, tekst, sortowanie)
+    \item Karty ogłoszeń z losową rotacją dla efektu „przypięcia do tablicy"
+    \item Przyciski akcji (edycja, usuwanie, zgłaszanie) na każdej karcie
+    \item Dialogi modalne do dodawania/edycji ogłoszeń
+    \item Powiadomienia Alert dla informacji zwrotnych
+    \item Tooltips na przyciskach dla lepszej dostępności
+\end{itemize}
+
+\textbf{Obsługa zdarzeń:}
+\begin{itemize}
+    \item \texttt{onAction} -- przyciski (filtrowanie, dodawanie, edycja)
+    \item \texttt{onMouseClicked} -- kliknięcie karty otwiera szczegóły
+    \item \texttt{Platform.runLater()} -- aktualizacja UI z wątków sieciowych
+\end{itemize}
+
+\subsection{Obsługa wyjątków i walidacja danych}
+
+\textbf{Obsługa wyjątków:}
+\begin{lstlisting}
+// Przykład obsługi wyjątków w ObslugaKlienta.java
+try {
+    while (true) {
+        Object obiekt = wejscie.readObject();
+        if (obiekt instanceof Zadanie) {
+            obslozZadanie((Zadanie) obiekt);
+        }
+    }
+} catch (EOFException e) {
+    // Klient się rozłączył - normalne zakończenie
+} catch (IOException | ClassNotFoundException e) {
+    e.printStackTrace();
+} finally {
+    zamknijPolaczenie();
+    Serwer.usunKlienta(this);
+}
+\end{lstlisting}
+
+\textbf{Typy obsługiwanych wyjątków:}
+\begin{itemize}
+    \item \texttt{SQLException} -- błędy bazy danych (obsługiwane w DAO)
+    \item \texttt{IOException} -- błędy komunikacji sieciowej
+    \item \texttt{EOFException} -- rozłączenie klienta
+    \item \texttt{ClassNotFoundException} -- błąd deserializacji
+    \item \texttt{NoSuchAlgorithmException} -- błąd hashowania (SHA-256)
+\end{itemize}
+
+\textbf{Walidacja danych:}
+\begin{lstlisting}
+// Walidacja przy rejestracji (KontrolerRejestracji.java)
+if (login.isEmpty() || haslo.isEmpty()) {
+    utworzAlert(Alert.AlertType.WARNING, 
+        "Uzupelnij wszystkie pola!");
+    return;
+}
+if (!haslo.equals(powtorzHaslo)) {
+    utworzAlert(Alert.AlertType.WARNING, 
+        "Hasla sie nie zgadzaja!");
+    return;
+}
+\end{lstlisting}
+
+\textbf{Walidacja po stronie serwera:}
+\begin{itemize}
+    \item Sprawdzanie uprawnień przed edycją/usuwaniem ogłoszeń
+    \item Weryfikacja roli administratora dla funkcji administracyjnych
+    \item Sprawdzanie czy użytkownik jest zalogowany
+\end{itemize}
+
+\subsection{Realizacja zadania}
+
+\textbf{1. Hashowanie hasła (SHA-256):}
+\begin{lstlisting}
+// Bezpieczenstwo.java
+public static String hashuj(String haslo) {
+    try {
+        MessageDigest md = MessageDigest.getInstance("SHA-256");
+        byte[] hash = md.digest(haslo.getBytes(StandardCharsets.UTF_8));
+        StringBuilder sb = new StringBuilder();
+        for (byte b : hash) {
+            sb.append(String.format("%02x", b));
+        }
+        return sb.toString();
+    } catch (NoSuchAlgorithmException e) {
+        throw new RuntimeException("SHA-256 niedostepny", e);
+    }
+}
+\end{lstlisting}
+
+\textbf{2. Komunikacja klient-serwer:}
+\begin{lstlisting}
+// KlientSieciowy.java - wysyłanie żądania
+public synchronized Odpowiedz wyslijISprawdz(Zadanie zadanie) {
+    try {
+        wyjscie.writeObject(zadanie);
+        wyjscie.flush();
+        return oczekujacaOdpowiedz.poll(5, TimeUnit.SECONDS);
+    } catch (Exception e) {
+        e.printStackTrace();
+        return null;
+    }
+}
+\end{lstlisting}
+
+\textbf{3. Powiadomienia real-time:}
+\begin{lstlisting}
+// Serwer.java - powiadamianie wszystkich klientów
+public static void powiadomWszystkich() {
+    Odpowiedz odswiez = new Odpowiedz(
+        StatusOdpowiedzi.ODSWIEZ, null, "Odswiezenie");
+    synchronized (klienci) {
+        for (ObslugaKlienta k : klienci) {
+            k.wyslij(odswiez);
+        }
+    }
+}
+\end{lstlisting}
+
+\textbf{4. Filtrowanie i sortowanie ogłoszeń:}
+\begin{lstlisting}
+// OgloszenieDAO.java - budowanie zapytania SQL
+switch (filtr.getSortowanie()) {
+    case "DATA_DESC": sql.append(" ORDER BY o.data_dodania DESC"); break;
+    case "TYTUL_ASC": sql.append(" ORDER BY o.tytul ASC"); break;
+    case "POPULARNOSC_DESC": sql.append(" ORDER BY o.wyswietlenia DESC"); break;
+    // ...
+}
+\end{lstlisting}
+
+\textbf{5. System zgłaszania ogłoszeń:}
+\begin{lstlisting}
+// OgloszenieDAO.java
+public void zglosOgloszenie(int idOgloszenia) throws SQLException {
+    String sql = "UPDATE ogloszenia SET zgloszenia = COALESCE(zgloszenia, 0) + 1 WHERE id = ?";
+    try (Connection pol = PolaczenieBazy.pobierzPolaczenie();
+         PreparedStatement pstm = pol.prepareStatement(sql)) {
+        pstm.setInt(1, idOgloszenia);
+        pstm.executeUpdate();
+    }
+}
+\end{lstlisting}
+
+\subsection{Javadoc}
+
+Dokumentacja Javadoc została wygenerowana dla wszystkich klas publicznych projektu. Każda klasa zawiera:
+\begin{itemize}
+    \item Opis klasy i jej przeznaczenia
+    \item Dokumentację konstruktorów i metod publicznych
+    \item Tagi \texttt{@author Dawid Sułek, Dominik Rodziewicz}
+    \item Tagi \texttt{@param}, \texttt{@return}, \texttt{@throws} gdzie stosowne
+\end{itemize}
+
+Przykład dokumentacji:
+\begin{lstlisting}
+/**
+ * Klasa odpowiedzialna za bezpieczne hashowanie hasel.
+ * Uzywa algorytmu SHA-256 do jednokierunkowego szyfrowania.
+ * 
+ * @author Dawid Sulek, Dominik Rodziewicz
+ */
+public class Bezpieczenstwo {
+    /**
+     * Hashuje haslo algorytmem SHA-256 i zwraca jego hex.
+     * 
+     * @param haslo haslo w postaci tekstowej
+     * @return hash SHA-256 w formacie szesnastkowym (64 znaki)
+     */
+    public static String hashuj(String haslo) { ... }
+}
+\end{lstlisting}
+
+\section{Wnioski}
+
+Realizacja projektu „Sieciowa Tablica Ogłoszeń" pozwoliła na praktyczne zastosowanie:
+
+\begin{enumerate}
+    \item \textbf{Programowania obiektowego} -- enkapsulacja, dziedziczenie interfejsów (\texttt{Serializable}, \texttt{Runnable}), polimorfizm
+    \item \textbf{Wzorców projektowych} -- Singleton, DAO, DTO, MVC
+    \item \textbf{Programowania współbieżnego} -- ExecutorService, synchronizacja, Platform.runLater()
+    \item \textbf{Komunikacji sieciowej} -- sockety TCP, strumienie obiektowe
+    \item \textbf{Baz danych} -- JDBC, PreparedStatement, transakcje
+    \item \textbf{Interfejsów graficznych} -- JavaFX, FXML, CSS, obsługa zdarzeń
+    \item \textbf{Bezpieczeństwa} -- hashowanie haseł, autoryzacja, walidacja danych
+\end{enumerate}
+
+Projekt może być rozszerzony o:
+\begin{itemize}
+    \item Szyfrowanie komunikacji (SSL/TLS)
+    \item System kategorii definiowanych przez administratora
+    \item Załączniki graficzne do ogłoszeń
+    \item Powiadomienia push na urządzenia mobilne
+\end{itemize}
+
+
+\section{Sposób oceny projektu}	
+\begin{tabular}{|c|c|c|}
+	\hline
+	Element & Punkty & Uzyskane \\
+	\hline
+	UML (diagramy klas, przypadków użycia) & 10 & \\
+	\hline
+	Struktura projektu + OOP (dziedziczenie, interfejsy, pakiety) & 20 & \\
+	\hline
+	Implementacja funkcjonalności & 30  &\\
+	\hline
+	GUI (ergonomia, poprawność, zdarzenia) & 20  &\\
+	\hline
+	Obsługa wyjątków i walidacja danych & 10  &\\
+	\hline
+	Dokumentacja Javadoc & 5 & \\
+	\hline
+	Prezentacja projektu & 5  &\\
+	\hline
+    RAZEM & 100  &\\
+    \hline
+\end{tabular}
+
+\subsection{Skala ocen}
+\begin{itemize}
+\item 90–100 pkt → 5.0
+\item 80–89 pkt → 4.5
+\item 70–79 pkt → 4.0
+\item 60–69 pkt → 3.5
+\item 50–59 pkt → 3.0
+\item poniżej 50 pkt → 2.0 (niezaliczone)
+\end{itemize}
+
+\end{document}

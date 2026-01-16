@@ -6,7 +6,13 @@ import java.sql.SQLException;
 import pl.tablicaogloszen.wspolne.*;
 
 /**
- * Wątek obsługujący pojedynczego klienta.
+ * Wątek obsługujący jednego klienta.
+ * Każdy klient który się połączy dostaje swój wątek tej klasy.
+ * 
+ * W metodzie run() jest pętla która odbiera żądania od klienta
+ * i wywołuje odpowiednie metody DAO (logowanie, dodawanie ogłoszeń itp.)
+ * 
+ * @author Dawid Sułek, Dominik Rodziewicz
  */
 public class ObslugaKlienta implements Runnable {
     private Socket gniazdo;
@@ -132,6 +138,42 @@ public class ObslugaKlienta implements Runnable {
                 }
                 case ODSWIEZ: {
                     wyslij(new Odpowiedz(StatusOdpowiedzi.OK, ogloszenieDAO.pobierzWszystkie(), "Odświeżono."));
+                    break;
+                }
+                case ZGLOS_OGLOSZENIE: {
+                    if (zalogowanyUzytkownik != null) {
+                        int id = (Integer) zadanie.getDane();
+                        ogloszenieDAO.zglosOgloszenie(id);
+                        wyslij(new Odpowiedz(StatusOdpowiedzi.OK, null, "Zgłoszono ogłoszenie."));
+                        Serwer.powiadomWszystkich();
+                    } else {
+                        wyslij(new Odpowiedz(StatusOdpowiedzi.BLAD, null, "Musisz być zalogowany."));
+                    }
+                    break;
+                }
+                case POBIERZ_SZCZEGOLY: {
+                    int id = (Integer) zadanie.getDane();
+                    ogloszenieDAO.zwiekszWyswietlenia(id);
+                    // Zwracamy odświeżoną listę (klient pobierze szczegóły sam)
+                    wyslij(new Odpowiedz(StatusOdpowiedzi.OK, null, "Wyświetlenie zarejestrowane."));
+                    break;
+                }
+                case POBIERZ_ZGLOSZONE: {
+                    if (zalogowanyUzytkownik != null && "ADMIN".equals(zalogowanyUzytkownik.getRola())) {
+                        wyslij(new Odpowiedz(StatusOdpowiedzi.OK, ogloszenieDAO.pobierzZgloszone(),
+                                "Zgłoszone ogłoszenia."));
+                    } else {
+                        wyslij(new Odpowiedz(StatusOdpowiedzi.BLAD, null, "Brak uprawnień."));
+                    }
+                    break;
+                }
+                case GENERUJ_RAPORT: {
+                    if (zalogowanyUzytkownik != null && "ADMIN".equals(zalogowanyUzytkownik.getRola())) {
+                        String raport = ogloszenieDAO.generujRaport();
+                        wyslij(new Odpowiedz(StatusOdpowiedzi.OK, raport, "Raport wygenerowany."));
+                    } else {
+                        wyslij(new Odpowiedz(StatusOdpowiedzi.BLAD, null, "Brak uprawnień."));
+                    }
                     break;
                 }
             }

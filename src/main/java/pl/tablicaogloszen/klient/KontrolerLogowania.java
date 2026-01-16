@@ -9,7 +9,7 @@ import java.io.IOException;
  * Kontroler widoku logowania.
  * Obsługuje formularz logowania i przekierowanie do rejestracji.
  * 
- * @author System
+ * @author Dawid Sułek, Dominik Rodziewicz
  * @version 1.0
  */
 public class KontrolerLogowania {

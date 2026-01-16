@@ -6,7 +6,7 @@ import java.io.Serializable;
  * Obiekt odpowiedzi przesyłany z serwera do klienta.
  * Zawiera status operacji, dane wynikowe i opcjonalny komunikat.
  * 
- * @author System
+ * @author Dawid Sułek, Dominik Rodziewicz
  * @version 1.0
  */
 public class Odpowiedz implements Serializable {

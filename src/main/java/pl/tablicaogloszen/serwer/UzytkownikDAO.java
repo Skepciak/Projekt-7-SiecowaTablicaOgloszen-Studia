@@ -7,11 +7,11 @@ import java.sql.SQLException;
 import pl.tablicaogloszen.wspolne.UzytkownikDTO;
 
 /**
- * Data Access Object dla użytkowników.
- * Obsługuje operacje rejestracji i logowania.
+ * DAO dla użytkowników - rejestracja i logowanie.
  * 
- * @author System
- * @version 1.0
+ * Hasła są hashowane przed zapisem do bazy (Bezpieczenstwo.hashuj()).
+ * 
+ * @author Dawid Sułek, Dominik Rodziewicz
  */
 public class UzytkownikDAO {
 

@@ -3,6 +3,8 @@ package pl.tablicaogloszen.wspolne;
 /**
  * Typ żądania wysyłanego od klienta do serwera.
  * Definiuje rodzaj operacji do wykonania.
+ * 
+ * @author Dawid Sułek, Dominik Rodziewicz
  */
 public enum TypZadania {
     /** Logowanie użytkownika */
@@ -22,5 +24,13 @@ public enum TypZadania {
     /** Pobranie kategorii */
     POBIERZ_KATEGORIE,
     /** Żądanie odświeżenia (push) */
-    ODSWIEZ
+    ODSWIEZ,
+    /** Zgłoszenie nieodpowiedniego ogłoszenia */
+    ZGLOS_OGLOSZENIE,
+    /** Pobranie szczegółów ogłoszenia (zwiększa licznik wyświetleń) */
+    POBIERZ_SZCZEGOLY,
+    /** Pobranie zgłoszonych ogłoszeń (tylko admin) */
+    POBIERZ_ZGLOSZONE,
+    /** Generowanie raportu (tylko admin) */
+    GENERUJ_RAPORT
 }

@@ -7,8 +7,13 @@ import pl.tablicaogloszen.wspolne.FiltrDTO;
 import pl.tablicaogloszen.wspolne.OgloszenieDTO;
 
 /**
- * Data Access Object dla ogłoszeń.
- * Obsługuje operacje CRUD oraz filtrowanie/sortowanie.
+ * DAO (Data Access Object) dla ogłoszeń.
+ * Tutaj jest cała logika SQL - dodawanie, edycja, usuwanie, filtrowanie
+ * ogłoszeń.
+ * 
+ * Używam PreparedStatement żeby było bezpieczne (ochrona przed SQL Injection).
+ * 
+ * @author Dawid Sułek, Dominik Rodziewicz
  */
 public class OgloszenieDAO {
 
@@ -69,7 +74,8 @@ public class OgloszenieDAO {
         StringBuilder sql = new StringBuilder();
         sql.append("SELECT o.id, o.tytul, o.tresc, o.dane_kontaktowe, ");
         sql.append("COALESCE(k.nazwa, 'Brak kategorii') as kategoria, ");
-        sql.append("o.id_autora, COALESCE(u.login, 'Nieznany') as autor, o.data_dodania ");
+        sql.append("o.id_autora, COALESCE(u.login, 'Nieznany') as autor, o.data_dodania, ");
+        sql.append("COALESCE(o.wyswietlenia, 0) as wyswietlenia, COALESCE(o.zgloszenia, 0) as zgloszenia ");
         sql.append("FROM ogloszenia o ");
         sql.append("LEFT JOIN kategorie k ON o.id_kategorii = k.id ");
         sql.append("LEFT JOIN uzytkownicy u ON o.id_autora = u.id "); // Zmiana na LEFT JOIN
@@ -103,6 +109,9 @@ public class OgloszenieDAO {
                     case "TYTUL_DESC":
                         sql.append("ORDER BY o.tytul DESC");
                         break;
+                    case "POPULARNOSC_DESC":
+                        sql.append("ORDER BY o.wyswietlenia DESC");
+                        break;
                     default:
                         sql.append("ORDER BY o.data_dodania DESC");
                         break;
@@ -131,7 +140,9 @@ public class OgloszenieDAO {
                         rs.getString("kategoria"),
                         rs.getInt("id_autora"),
                         rs.getString("autor"),
-                        rs.getTimestamp("data_dodania").toLocalDateTime()));
+                        rs.getTimestamp("data_dodania").toLocalDateTime(),
+                        rs.getInt("wyswietlenia"),
+                        rs.getInt("zgloszenia")));
             }
         }
 
@@ -156,5 +167,95 @@ public class OgloszenieDAO {
             }
         }
         return kategorie;
+    }
+
+    /**
+     * Zwiększa licznik wyświetleń ogłoszenia o 1.
+     * Wywoływane gdy użytkownik otwiera szczegóły ogłoszenia.
+     */
+    public void zwiekszWyswietlenia(int idOgloszenia) throws SQLException {
+        String sql = "UPDATE ogloszenia SET wyswietlenia = COALESCE(wyswietlenia, 0) + 1 WHERE id = ?";
+        try (Connection pol = PolaczenieBazy.pobierzPolaczenie();
+                PreparedStatement pstm = pol.prepareStatement(sql)) {
+            pstm.setInt(1, idOgloszenia);
+            pstm.executeUpdate();
+        }
+    }
+
+    /**
+     * Zwiększa licznik zgłoszeń ogłoszenia o 1.
+     * Wywoływane gdy użytkownik zgłasza nieodpowiednie ogłoszenie.
+     */
+    public void zglosOgloszenie(int idOgloszenia) throws SQLException {
+        String sql = "UPDATE ogloszenia SET zgloszenia = COALESCE(zgloszenia, 0) + 1 WHERE id = ?";
+        try (Connection pol = PolaczenieBazy.pobierzPolaczenie();
+                PreparedStatement pstm = pol.prepareStatement(sql)) {
+            pstm.setInt(1, idOgloszenia);
+            pstm.executeUpdate();
+        }
+    }
+
+    /**
+     * Pobiera ogłoszenia które mają co najmniej 1 zgłoszenie.
+     * Dostępne tylko dla administratora.
+     */
+    public List<OgloszenieDTO> pobierzZgloszone() throws SQLException {
+        List<OgloszenieDTO> lista = new ArrayList<>();
+        String sql = "SELECT o.id, o.tytul, o.tresc, o.dane_kontaktowe, " +
+                "COALESCE(k.nazwa, 'Brak kategorii') as kategoria, " +
+                "o.id_autora, COALESCE(u.login, 'Nieznany') as autor, o.data_dodania, " +
+                "COALESCE(o.wyswietlenia, 0) as wyswietlenia, COALESCE(o.zgloszenia, 0) as zgloszenia " +
+                "FROM ogloszenia o " +
+                "LEFT JOIN kategorie k ON o.id_kategorii = k.id " +
+                "LEFT JOIN uzytkownicy u ON o.id_autora = u.id " +
+                "WHERE o.zgloszenia > 0 ORDER BY o.zgloszenia DESC";
+
+        try (Connection pol = PolaczenieBazy.pobierzPolaczenie();
+                Statement stm = pol.createStatement();
+                ResultSet rs = stm.executeQuery(sql)) {
+
+            while (rs.next()) {
+                lista.add(new OgloszenieDTO(
+                        rs.getInt("id"),
+                        rs.getString("tytul"),
+                        rs.getString("tresc"),
+                        rs.getString("dane_kontaktowe"),
+                        rs.getString("kategoria"),
+                        rs.getInt("id_autora"),
+                        rs.getString("autor"),
+                        rs.getTimestamp("data_dodania").toLocalDateTime(),
+                        rs.getInt("wyswietlenia"),
+                        rs.getInt("zgloszenia")));
+            }
+        }
+        return lista;
+    }
+
+    /**
+     * Generuje raport tekstowy wszystkich ogłoszeń.
+     * 
+     * @return Tekst raportu gotowy do zapisu do pliku
+     */
+    public String generujRaport() throws SQLException {
+        StringBuilder raport = new StringBuilder();
+        raport.append("=== RAPORT TABLICY OGŁOSZEŃ ===\n");
+        raport.append("Data wygenerowania: ").append(java.time.LocalDateTime.now()).append("\n\n");
+
+        List<OgloszenieDTO> lista = pobierzWszystkie();
+        raport.append("Liczba ogłoszeń: ").append(lista.size()).append("\n\n");
+
+        for (OgloszenieDTO o : lista) {
+            raport.append("---\n");
+            raport.append("ID: ").append(o.getId()).append("\n");
+            raport.append("Tytuł: ").append(o.getTytul()).append("\n");
+            raport.append("Kategoria: ").append(o.getKategoria()).append("\n");
+            raport.append("Autor: ").append(o.getAutor()).append("\n");
+            raport.append("Data: ").append(o.getDataDodania()).append("\n");
+            raport.append("Wyświetlenia: ").append(o.getWyswietlenia()).append("\n");
+            raport.append("Zgłoszenia: ").append(o.getZgloszenia()).append("\n");
+            raport.append("Treść: ").append(o.getTresc()).append("\n");
+        }
+
+        return raport.toString();
     }
 }

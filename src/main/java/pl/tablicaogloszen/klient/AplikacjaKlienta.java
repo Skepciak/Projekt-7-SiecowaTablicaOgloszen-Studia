@@ -9,11 +9,10 @@ import javafx.stage.Stage;
 import java.io.IOException;
 
 /**
- * Główna klasa aplikacji klienckiej JavaFX.
- * Zarządza scenami i widokami aplikacji.
+ * Główna klasa klienta JavaFX - tu startuje cała aplikacja okienkowa.
+ * Zarządza ładowaniem widoków (logowanie, rejestracja, tablica).
  * 
- * @author System
- * @version 2.0
+ * @author Dawid Sułek, Dominik Rodziewicz
  */
 public class AplikacjaKlienta extends Application {
 

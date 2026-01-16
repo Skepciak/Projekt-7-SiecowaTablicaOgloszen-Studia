@@ -4,11 +4,13 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * Data Transfer Object reprezentujący ogłoszenie.
- * Używany do przesyłania danych ogłoszenia między klientem a serwerem.
+ * DTO ogłoszenia - przesyłany między klientem a serwerem.
+ * Zawiera wszystkie dane ogłoszenia włącznie z licznikami.
+ * 
+ * @author Dawid Sułek, Dominik Rodziewicz
  */
 public class OgloszenieDTO implements Serializable {
-    private static final long serialVersionUID = 2L;
+    private static final long serialVersionUID = 3L;
 
     private int id;
     private String tytul;
@@ -16,14 +18,17 @@ public class OgloszenieDTO implements Serializable {
     private String daneKontaktowe;
     private String kategoria;
     private int idAutora;
-    private String autor; // login autora
+    private String autor;
     private LocalDateTime dataDodania;
+    private int wyswietlenia; // licznik popularności
+    private int zgloszenia; // licznik zgłoszeń
 
     /**
      * Konstruktor pełny (do pobierania z bazy).
      */
     public OgloszenieDTO(int id, String tytul, String tresc, String daneKontaktowe,
-            String kategoria, int idAutora, String autor, LocalDateTime dataDodania) {
+            String kategoria, int idAutora, String autor, LocalDateTime dataDodania,
+            int wyswietlenia, int zgloszenia) {
         this.id = id;
         this.tytul = tytul;
         this.tresc = tresc;
@@ -32,6 +37,8 @@ public class OgloszenieDTO implements Serializable {
         this.idAutora = idAutora;
         this.autor = autor;
         this.dataDodania = dataDodania;
+        this.wyswietlenia = wyswietlenia;
+        this.zgloszenia = zgloszenia;
     }
 
     /**
@@ -87,6 +94,16 @@ public class OgloszenieDTO implements Serializable {
         return dataDodania;
     }
 
+    /** @return Liczba wyświetleń (popularność) */
+    public int getWyswietlenia() {
+        return wyswietlenia;
+    }
+
+    /** @return Liczba zgłoszeń */
+    public int getZgloszenia() {
+        return zgloszenia;
+    }
+
     // ==================== SETTERY ====================
 
     public void setId(int id) {
@@ -119,6 +136,14 @@ public class OgloszenieDTO implements Serializable {
 
     public void setDataDodania(LocalDateTime dataDodania) {
         this.dataDodania = dataDodania;
+    }
+
+    public void setWyswietlenia(int wyswietlenia) {
+        this.wyswietlenia = wyswietlenia;
+    }
+
+    public void setZgloszenia(int zgloszenia) {
+        this.zgloszenia = zgloszenia;
     }
 
     @Override

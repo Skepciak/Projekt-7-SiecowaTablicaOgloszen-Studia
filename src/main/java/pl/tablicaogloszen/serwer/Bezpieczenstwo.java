@@ -5,15 +5,17 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 /**
- * Klasa pomocnicza do obsługi bezpieczeństwa (hashowanie haseł).
+ * Klasa do hashowania haseł.
+ * Używamy SHA-256 żeby hasła nie były przechowywane jako plaintext w bazie.
  */
 public class Bezpieczenstwo {
 
     /**
-     * Tworzy hash SHA-256 z podanego hasła.
+     * Hashuje hasło algorytmem SHA-256.
+     * Dzięki temu nawet jak ktoś wejdzie do bazy, nie zobaczy prawdziwych haseł.
      * 
-     * @param haslo Hasło w postaci tekstu jawnego
-     * @return Hash w postaci ciągu szesnastkowego (hex)
+     * @param haslo hasło użytkownika (plaintext)
+     * @return zahashowane hasło jako string hex (64 znaki)
      */
     public static String hashuj(String haslo) {
         try {

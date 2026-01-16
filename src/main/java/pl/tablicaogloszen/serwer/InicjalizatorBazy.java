@@ -42,16 +42,30 @@ public class InicjalizatorBazy {
                     "FOREIGN KEY (id_kategorii) REFERENCES kategorie(id) ON DELETE SET NULL, " +
                     "FOREIGN KEY (id_autora) REFERENCES uzytkownicy(id) ON DELETE CASCADE)");
 
-            // 4. MIGRACJA: Dodanie kolumny dane_kontaktowe (jeśli nie istnieje) - metoda
-            // brute force
+            // 4. MIGRACJA: Dodanie kolumny dane_kontaktowe (jeśli nie istnieje)
             try {
                 wykonajSQL(pol, "ALTER TABLE ogloszenia ADD COLUMN dane_kontaktowe VARCHAR(255) AFTER tresc");
                 System.out.println("   + Dodano kolumnę 'dane_kontaktowe'");
             } catch (SQLException e) {
-                // Ignorujemy błąd "Duplicate column name", inne logujemy
                 if (!e.getMessage().toLowerCase().contains("duplicate") && e.getErrorCode() != 1060) {
                     System.out.println("   (Info: " + e.getMessage() + ")");
                 }
+            }
+
+            // 4a. MIGRACJA: Kolumna wyswietlenia (licznik popularności)
+            try {
+                wykonajSQL(pol, "ALTER TABLE ogloszenia ADD COLUMN wyswietlenia INT DEFAULT 0");
+                System.out.println("   + Dodano kolumnę 'wyswietlenia'");
+            } catch (SQLException e) {
+                // Ignorujemy jeśli już istnieje
+            }
+
+            // 4b. MIGRACJA: Kolumna zgloszenia (licznik zgłoszeń)
+            try {
+                wykonajSQL(pol, "ALTER TABLE ogloszenia ADD COLUMN zgloszenia INT DEFAULT 0");
+                System.out.println("   + Dodano kolumnę 'zgloszenia'");
+            } catch (SQLException e) {
+                // Ignorujemy jeśli już istnieje
             }
 
             // 5. Dodaj admina

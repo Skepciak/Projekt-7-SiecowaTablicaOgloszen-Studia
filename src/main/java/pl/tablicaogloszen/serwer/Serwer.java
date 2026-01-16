@@ -12,21 +12,15 @@ import pl.tablicaogloszen.wspolne.Odpowiedz;
 import pl.tablicaogloszen.wspolne.StatusOdpowiedzi;
 
 /**
- * Główna klasa serwera aplikacji "Sieciowa Tablica Ogłoszeń".
- * <p>
- * Serwer nasłuchuje na określonym porcie (domyślnie 8080) i obsługuje
- * wielu klientów jednocześnie za pomocą puli wątków.
- * </p>
+ * Główna klasa serwera - nasłuchuje na porcie 8080 i obsługuje klientów.
  * 
- * <h2>Funkcjonalności:</h2>
- * <ul>
- * <li>Obsługa wielu klientów jednocześnie (ThreadPool)</li>
- * <li>Powiadamianie wszystkich klientów o zmianach (real-time)</li>
- * <li>Zarządzanie połączeniami z bazą danych MySQL</li>
- * </ul>
+ * Używam puli wątków (ExecutorService) żeby obsługiwać wielu klientów naraz.
+ * Każdy klient dostaje swój wątek z klasy ObslugaKlienta.
  * 
- * @author System
- * @version 2.0
+ * Jak ktoś doda/usunie ogłoszenie, serwer wysyła powiadomienie do wszystkich
+ * żeby odświeżyli sobie listę (real-time updates).
+ * 
+ * @author Dawid Sułek, Dominik Rodziewicz
  */
 public class Serwer {
     /** Port na którym nasłuchuje serwer */

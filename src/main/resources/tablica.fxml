@@ -16,6 +16,7 @@
             <!-- Nagłówek -->
             <HBox alignment="CENTER_LEFT" spacing="15" style="-fx-padding: 0 0 10 0;">
                 <Button text="✨ Nowe Zlecenie" onAction="#pokazDialogDodawania" styleClass="add-button" prefHeight="40"/>
+                <Button fx:id="przyciskZgloszone" text="🚩 Zgłoszone Zlecenia" onAction="#pokazZgloszone" styleClass="secondary-button" prefHeight="40"/>
                 <Region HBox.hgrow="ALWAYS"/>
                 <Label text="Tablica Ogłoszeń" styleClass="header-label"/>
                 <Region HBox.hgrow="ALWAYS"/>

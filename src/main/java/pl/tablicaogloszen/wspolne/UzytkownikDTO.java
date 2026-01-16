@@ -6,7 +6,7 @@ import java.io.Serializable;
  * Data Transfer Object reprezentujący użytkownika systemu.
  * Używane do przesyłania danych o zalogowanym użytkowniku.
  * 
- * @author System
+ * @author Dawid Sułek, Dominik Rodziewicz
  * @version 1.0
  */
 public class UzytkownikDTO implements Serializable {
