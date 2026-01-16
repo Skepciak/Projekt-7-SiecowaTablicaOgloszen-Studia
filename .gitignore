@@ -1,0 +1,9 @@
+target/
+*.class
+*.log
+*.ctxt
+.vscode/
+.idea/
+*.iml
+*.DS_Store
+*.pdf
