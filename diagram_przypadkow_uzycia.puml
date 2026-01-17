@@ -1,0 +1,76 @@
+@startuml Diagram_Przypadkow_Uzycia
+left to right direction
+skinparam backgroundColor #FFFFFF
+skinparam usecase {
+    BackgroundColor #E8F5E9
+    BorderColor #2E7D32
+    FontColor #1B5E20
+}
+skinparam actor {
+    BackgroundColor #BBDEFB
+    BorderColor #1565C0
+}
+skinparam rectangle {
+    BackgroundColor #FAFAFA
+    BorderColor #757575
+}
+
+title Diagram Przypadków Użycia - Sieciowa Tablica Ogłoszeń
+footer Autorzy: Dawid Sułek, Dominik Rodziewicz
+
+actor "Użytkownik\n(niezalogowany)" as Guest
+actor "Użytkownik\n(zalogowany)" as User
+actor "Administrator" as Admin
+
+rectangle "System Tablicy Ogłoszeń" {
+    ' Podstawowe - dostęp bez logowania
+    usecase "Rejestracja" as UC_REG
+    usecase "Logowanie" as UC_LOG
+    
+    ' Zalogowany użytkownik - przeglądanie i zarządzanie
+    usecase "Przeglądanie ogłoszeń" as UC_VIEW
+    usecase "Filtrowanie ogłoszeń" as UC_FILTER
+    usecase "Sortowanie ogłoszeń" as UC_SORT
+    usecase "Dodawanie ogłoszenia" as UC_ADD
+    usecase "Edycja własnego ogłoszenia" as UC_EDIT
+    usecase "Usuwanie własnego ogłoszenia" as UC_DEL
+    usecase "Wyświetlanie szczegółów" as UC_DETAILS
+    usecase "Zgłaszanie ogłoszenia" as UC_REPORT_AD
+    usecase "Odbieranie powiadomień\nreal-time" as UC_PUSH
+    
+    ' Administrator
+    usecase "Usuwanie dowolnego ogłoszenia" as UC_ADMIN_DEL
+    usecase "Przeglądanie zgłoszonych" as UC_VIEW_REPORTED
+    usecase "Generowanie raportu" as UC_REPORT
+}
+
+' Niezalogowany - tylko rejestracja i logowanie
+Guest --> UC_REG
+Guest --> UC_LOG
+
+' Zalogowany użytkownik - pełny dostęp do tablicy
+User --> UC_VIEW
+User --> UC_FILTER
+User --> UC_SORT
+User --> UC_ADD
+User --> UC_EDIT
+User --> UC_DEL
+User --> UC_DETAILS
+User --> UC_REPORT_AD
+User --> UC_PUSH
+
+' Administrator dziedziczy po użytkowniku
+Admin --|> User
+
+' Funkcje tylko dla admina
+Admin --> UC_ADMIN_DEL
+Admin --> UC_VIEW_REPORTED
+Admin --> UC_REPORT
+
+' Relacje include/extend
+UC_FILTER ..> UC_VIEW : <<extend>>
+UC_SORT ..> UC_VIEW : <<extend>>
+UC_DETAILS ..> UC_VIEW : <<extend>>
+UC_REPORT_AD ..> UC_DETAILS : <<extend>>
+
+@enduml

@@ -4,6 +4,7 @@
 \usepackage{listings}
 \usepackage{xcolor}
 \usepackage{hyperref}
+\usepackage{float}
 
 % Konfiguracja listingów kodu Java
 \lstset{
@@ -71,31 +72,19 @@ Aplikacja realizuje następujące funkcjonalności:
 
 \subsection{Dokumentacja UML}
 
-\textbf{Diagram klas} przedstawia strukturę pakietów aplikacji:
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{diagram_klas.png}
+    \caption{Diagram klas systemu Sieciowa Tablica Ogłoszeń}
+    \label{fig:diagram_klas}
+\end{figure}
 
-\begin{itemize}
-    \item \texttt{pl.tablicaogloszen.wspolne} -- klasy DTO (Data Transfer Objects) współdzielone między klientem a serwerem
-    \item \texttt{pl.tablicaogloszen.serwer} -- logika serwera, DAO, zarządzanie połączeniami
-    \item \texttt{pl.tablicaogloszen.klient} -- aplikacja klienta JavaFX, kontrolery FXML
-\end{itemize}
-
-Główne klasy modelu:
-\begin{itemize}
-    \item \texttt{OgloszenieDTO} -- reprezentacja ogłoszenia (id, tytuł, treść, kategoria, autor, data, wyświetlenia, zgłoszenia)
-    \item \texttt{UzytkownikDTO} -- reprezentacja użytkownika (id, login, rola)
-    \item \texttt{FiltrDTO} -- parametry filtrowania i sortowania
-    \item \texttt{Zadanie} -- żądanie klienta (typ + dane)
-    \item \texttt{Odpowiedz} -- odpowiedź serwera (status + dane + wiadomość)
-\end{itemize}
-
-\textbf{Diagram przypadków użycia} pokazuje interakcje aktorów z systemem:
-\begin{itemize}
-    \item \textbf{Użytkownik niezalogowany}: rejestracja, logowanie, przeglądanie ogłoszeń
-    \item \textbf{Użytkownik zalogowany}: wszystkie powyższe + dodawanie, edycja, usuwanie własnych, zgłaszanie
-    \item \textbf{Administrator}: wszystkie powyższe + usuwanie dowolnych, przeglądanie zgłoszonych, raporty
-\end{itemize}
-
-\textit{Pełna dokumentacja UML znajduje się w pliku \texttt{dokumentacja.puml} w formacie PlantUML.}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{diagram_przypadkow_uzycia.png}
+    \caption{Diagram przypadków użycia systemu Sieciowa Tablica Ogłoszeń}
+    \label{fig:diagram_przypadkow_uzycia}
+\end{figure}
 
 \subsection{Struktura projektu}
 
